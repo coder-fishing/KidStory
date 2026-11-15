@@ -3,6 +3,7 @@
 import hashlib
 import importlib.metadata
 import json
+import math
 import platform
 import subprocess
 import time
@@ -218,7 +219,11 @@ def _effective_generation_settings(settings: dict | None) -> dict:
         raise ValueError("do_sample must be a boolean")
     for name in ("temperature", "top_p", "repetition_penalty"):
         value = effective[name]
-        if isinstance(value, bool) or not isinstance(value, (int, float)) or value <= 0:
+        try:
+            finite = math.isfinite(value)
+        except (OverflowError, TypeError):
+            finite = False
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or not finite or value <= 0:
             raise ValueError(f"{name} must be a positive number")
     if effective["top_p"] > 1:
         raise ValueError("top_p must not exceed 1")

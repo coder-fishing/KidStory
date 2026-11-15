@@ -1,7 +1,8 @@
 """Tests for the M3 baseline runner, using synthetic inputs only."""
 
-import json
 import hashlib
+import json
+import math
 import sys
 import tempfile
 import unittest
@@ -294,6 +295,76 @@ class BaselineInputTests(unittest.TestCase):
 
         self.assertEqual(backend.load_calls, [])
         self.assertFalse(output.exists())
+
+    def test_non_finite_generation_settings_are_rejected_before_output_creation(self):
+        baseline = self.baseline_runner()
+        for index, settings in enumerate([
+            {"temperature": math.nan},
+            {"top_p": math.nan},
+            {"temperature": math.inf},
+            {"repetition_penalty": math.inf},
+        ]):
+            with self.subTest(settings=settings):
+                output = self.temp / f"non_finite_{index}"
+                backend = FakeBackend()
+                with self.assertRaises(ValueError):
+                    baseline.run_baseline(
+                        self.fixture, self.write_system(), output,
+                        backend=backend, generation_settings=settings,
+                    )
+                self.assertFalse(output.exists())
+                self.assertEqual(backend.load_calls, [])
+
+
+class ColabNotebookContractTests(unittest.TestCase):
+    def setUp(self):
+        self.root = ROOT
+
+    def notebook(self):
+        path = self.root / "notebooks/m3_baseline_colab.ipynb"
+        if not path.is_file():
+            self.fail("M3 Colab notebook has not been created")
+        return json.loads(path.read_text(encoding="utf-8"))
+
+    def test_notebook_is_valid_and_orders_auth_runtime_install_and_run(self):
+        notebook = self.notebook()
+        self.assertEqual(notebook["nbformat"], 4)
+        cells = notebook["cells"]
+        sources = ["".join(cell["source"]) for cell in cells]
+        headings = [source for source in sources if source.lstrip().startswith("#")]
+        required = ["1. Cấu hình", "2. Truy cập repo", "3. Kiểm tra GPU", "4. Cài dependencies", "5. Chạy baseline"]
+        joined = "\n".join(headings)
+        positions = [joined.index(heading) for heading in required]
+        self.assertEqual(positions, sorted(positions))
+        self.assertTrue(any("torch.cuda.is_available" in source for source in sources))
+        self.assertTrue(any("run_baseline" in source for source in sources))
+        self.assertIn("Required package missing", "\n".join(sources))
+        self.assertIn("PackageNotFoundError", "\n".join(sources))
+
+    def test_notebook_uses_secret_without_exposing_credentials_or_unsloth(self):
+        notebook = self.notebook()
+        sources = "\n".join("".join(cell["source"]) for cell in notebook["cells"])
+        self.assertIn("userdata.get(\"GITHUB_TOKEN\")", sources)
+        self.assertIn("GIT_ASKPASS", sources)
+        self.assertNotIn("github_pat_", sources)
+        self.assertNotIn("ghp_", sources)
+        self.assertNotIn("pip install unsloth", sources.lower())
+        self.assertNotIn("import unsloth", sources.lower())
+        self.assertNotIn("huggingface.co/", sources.lower())
+
+    def test_lock_and_notebook_match_pinned_model_prompt_and_safe_output(self):
+        notebook = self.notebook()
+        sources = "\n".join("".join(cell["source"]) for cell in notebook["cells"])
+        lock = (self.root / "requirements/m3-colab.lock.txt").read_text(encoding="utf-8")
+        import kids_story.baseline as baseline
+        self.assertIn(baseline.MODEL_ID, sources)
+        self.assertIn(baseline.MODEL_REVISION, sources)
+        self.assertIn("data/evaluation/dev_cases.jsonl", sources)
+        self.assertIn("prompts/story_system_v1.txt", sources)
+        self.assertIn("outputs", sources)
+        self.assertRegex(lock, r"(?m)^transformers==[0-9.]+$")
+        self.assertRegex(lock, r"(?m)^accelerate==[0-9.]+$")
+        self.assertNotIn("unsloth", lock.lower())
 
 
 if __name__ == "__main__":
