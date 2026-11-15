@@ -349,6 +349,7 @@ class ColabNotebookContractTests(unittest.TestCase):
         sources = "\n".join("".join(cell["source"]) for cell in notebook["cells"])
         self.assertIn("userdata.get(\"GITHUB_TOKEN\")", sources)
         self.assertIn("GIT_ASKPASS", sources)
+        self.assertIn('BRANCH = "codex/m3"', sources)
         self.assertNotIn("github_pat_", sources)
         self.assertNotIn("ghp_", sources)
         self.assertNotIn("GITHUB_TOKEN@", sources)
