@@ -2,7 +2,7 @@
 
 import math
 import re
-from itertools import combinations
+from collections import defaultdict
 from pathlib import Path
 
 from .io import write_json
@@ -20,7 +20,7 @@ def shingles(text: str, n: int) -> set[tuple]:
 
 
 def screen(records: list[dict], *, ngram: int = 3, threshold: float = .65,
-           max_records: int = 500) -> dict:
+           max_records: int = 10000) -> dict:
     if not 1 <= ngram <= 10 or not math.isfinite(threshold) or not 0 < threshold <= 1:
         raise ValueError("Invalid ngram/threshold")
     rows = candidates(records)
@@ -28,7 +28,24 @@ def screen(records: list[dict], *, ngram: int = 3, threshold: float = .65,
         raise ValueError("All-pairs screening cap exceeded; use smaller snapshot")
     grams = {r["source_id"]: shingles(r["processed_text"], ngram) for r in rows}
     pairs = []
-    for a, b in combinations(rows, 2):
+    # Inverted postings generate only pairs sharing a shingle. At positive
+    # thresholds a disjoint pair can never qualify. No approximate recall loss.
+    postings = defaultdict(list)
+    row_by_id = {row["source_id"]: row for row in rows}
+    possible_pairs = []
+    for row in rows:
+        sid = row["source_id"]
+        overlaps = defaultdict(int)
+        for gram in grams[sid]:
+            for other in postings[gram]:
+                overlaps[other] += 1
+            postings[gram].append(sid)
+        for other, intersection in overlaps.items():
+            union = len(grams[sid]) + len(grams[other]) - intersection
+            if union and intersection / union >= threshold:
+                possible_pairs.append((row_by_id[other], row))
+    possible_pairs.sort(key=lambda pair: (pair[0]["source_id"], pair[1]["source_id"]))
+    for a, b in possible_pairs:
         if a["exact_hash"] == b["exact_hash"]:
             continue  # M1 already handles exact pairs.
         x, y = grams[a["source_id"]], grams[b["source_id"]]
@@ -45,7 +62,7 @@ def screen(records: list[dict], *, ngram: int = 3, threshold: float = .65,
         groups = [g for g in groups if not g & members]
         groups.append(members.union(*overlaps))
     return {"schema_version": 1, "corpus_hash": corpus_hash(records),
-            "method": "casefold-unicode-word-shingles-jaccard-all-pairs-v1",
+            "method": "casefold-unicode-word-shingles-jaccard-inverted-v2",
             "ngram": ngram, "threshold": threshold, "max_records": max_records,
             "records_screened": len(rows), "pairs": pairs,
             "candidate_groups": sorted([sorted(g) for g in groups]),

@@ -1,5 +1,15 @@
 # Sinh truyện ngắn thiếu nhi tiếng Việt
 
+## Công cụ mới: pool 10.000 đến M4
+
+Xem [hướng dẫn chạy](docs/M4_RUNBOOK.md). Theo thứ tự: notebook M2 EDA
+(mặc định 10.000 ứng viên), M2 review, rồi M4 QLoRA Colab. Logic nằm trong
+module Python; bảng sửa theo ngữ cảnh kiểm tra hash và yêu cầu duyệt lại.
+Detector gần trùng CPU hỗ trợ tối đa 10.000 bản ghi.
+M4 đã có code preflight, response loss mask, train/resume, lưu adapter và reload dev;
+**chưa chạy GPU để xác nhận tương thích hoặc chất lượng**. Không tự phê duyệt dữ liệu.
+Lệnh kiểm tra đã chạy: `python -m unittest discover -s tests` (54 tests đạt).
+
 Đồ án NLP cho trẻ **6–8 tuổi**, nghiên cứu câu hỏi: fine-tuning bằng QLoRA có cải thiện chất lượng sinh truyện theo yêu cầu so với **cùng mô hình gốc + System Prompt được thiết kế tốt** hay không? Kết quả có thể tốt hơn, tương đương hoặc kém hơn; chưa có thực nghiệm.
 
 Đầu vào: chủ đề, nhân vật, bài học, độ dài tùy chọn. Đầu ra: truyện tiếng Việt có mở đầu, diễn biến, kết thúc và bài học qua hành động. Mặc định đề xuất **150–250 đơn vị cách trắng**, không phải số từ đã phân đoạn tiếng Việt hoặc chuẩn sư phạm. Ràng buộc cụ thể của đề được ưu tiên.
@@ -31,7 +41,7 @@ data/raw/              snapshot khảo sát HF (bị Git ignore)
 outputs/               kết quả chạy và báo cáo (bị Git ignore)
 ```
 
-Đã triển khai phần dữ liệu và xuất hội thoại SFT có điều kiện trong `src/kids_story/data/`. Fine-tune/QLoRA và `app/` Gradio **chưa triển khai**. M3 có module baseline Transformers và notebook Colab mỏng; baseline Qwen2.5-3B-Instruct đã sinh 20/20 đề dev trong một run Colab. Có bảng điểm AI hỗ trợ trên rubric nháp; chưa có metric chất lượng được hiệu chuẩn hoặc kết luận tổng quát. Không có module rỗng mô phỏng tiến độ.
+Đã triển khai phần dữ liệu và xuất hội thoại SFT có điều kiện trong `src/kids_story/data/`. Fine-tune/QLoRA đã có runner M4 chưa kiểm chứng GPU; `app/` Gradio chưa triển khai. M3 có module baseline Transformers và notebook Colab mỏng; baseline Qwen2.5-3B-Instruct đã sinh 20/20 đề dev trong một run Colab. Có bảng điểm AI hỗ trợ trên rubric nháp; chưa có metric chất lượng được hiệu chuẩn hoặc kết luận tổng quát. Không có module rỗng mô phỏng tiến độ.
 
 ## Chạy M1 trên CPU
 

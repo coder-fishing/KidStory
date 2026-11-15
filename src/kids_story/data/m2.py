@@ -13,13 +13,14 @@ from .near import export_pairs, screen
 from .process import summarize
 from .review import candidates, export_review, import_review, load_records
 from .sft import export_sft
+from .edits import apply_edits, export_edits
 
 
 def prepare(input_path: Path, output_dir: Path, *, sample_size: int = 30,
             seed: int = 42, threshold: float = .65, ngram: int = 3) -> dict:
     records = load_records(input_path)
-    if not 1 <= sample_size <= min(200, len(records)):
-        raise ValueError("sample_size must be 1..200 and no larger than the local population")
+    if not 1 <= sample_size <= min(10000, len(records)):
+        raise ValueError("sample_size must be 1..10000 and no larger than the local population")
     ordered = sorted(records, key=lambda r: r.get("audit_id", r.get("source_id")))
     # Include quarantined records in sampling; do not hide bad data by sampling only clean rows.
     selected = random.Random(seed).sample(ordered, sample_size)
@@ -53,6 +54,13 @@ def prepare(input_path: Path, output_dir: Path, *, sample_size: int = 30,
 def main() -> int:
     parser = argparse.ArgumentParser(description="CPU M2, human review required")
     commands = parser.add_subparsers(dest="command", required=True)
+    edit_export = commands.add_parser("export-edits")
+    edit_export.add_argument("--input", type=Path, required=True)
+    edit_export.add_argument("--csv", type=Path, required=True)
+    edit_import = commands.add_parser("apply-edits")
+    edit_import.add_argument("--input", type=Path, required=True)
+    edit_import.add_argument("--csv", type=Path, required=True)
+    edit_import.add_argument("--output-dir", type=Path, required=True)
     prep = commands.add_parser("prepare")
     prep.add_argument("--input", type=Path, required=True)
     prep.add_argument("--output-dir", type=Path, required=True)
@@ -101,7 +109,13 @@ def main() -> int:
                       "output_dir": str(args.output_dir)}
         else:
             rows = load_records(args.input)
-            if args.command == "export-review":
+            if args.command == "export-edits":
+                export_edits(rows, args.csv)
+                result = {"csv": str(args.csv)}
+            elif args.command == "apply-edits":
+                result = apply_edits(rows, args.csv, args.output_dir)
+                result = {"edited_stories": result["edited_stories"]}
+            elif args.command == "export-review":
                 export_review(rows, args.output_dir)
                 result = {"review_rows": len(candidates(rows))}
             elif args.command == "import-review":
