@@ -2,12 +2,12 @@
 
 ## M3 baseline: đã có notebook, chưa chạy trên Colab
 
-Notebook [m3_baseline_colab.ipynb](../notebooks/m3_baseline_colab.ipynb) clone repo riêng qua GitHub Secret `GITHUB_TOKEN`, ghi commit, yêu cầu GPU CUDA, cài các dependency pin trong [m3-colab.lock.txt](../requirements/m3-colab.lock.txt), mount Drive theo mặc định rồi gọi `kids_story.baseline.run_baseline`. PyTorch do Colab cung cấp được giữ nguyên và ghi vào `run_config.json`. Notebook không cài Unsloth, không cần Hugging Face token cho model public và không đọc golden draft.
+Notebook [m3_baseline_colab.ipynb](../notebooks/m3_baseline_colab.ipynb) clone repo public trực tiếp từ nhánh `main`, ghi commit, yêu cầu GPU CUDA, cài các dependency pin trong [m3-colab.lock.txt](../requirements/m3-colab.lock.txt), mount Drive theo mặc định rồi gọi `kids_story.baseline.run_baseline`. PyTorch do Colab cung cấp được giữ nguyên và ghi vào `run_config.json`. Notebook không cài Unsloth, không cần Hugging Face token cho model public và không đọc golden draft.
 
 Trước khi mở notebook:
 
-1. Push commit cần chạy lên `main` của repo riêng, hoặc nhập SHA đã push vào `COMMIT_TO_RUN`. Notebook chỉ clone mã nguồn đang có trên remote.
-2. Trong Colab Secrets, tạo `GITHUB_TOKEN` có quyền đọc repository và cho notebook truy cập secret. Không dán token vào cell, URL hay output.
+1. Notebook lấy code từ nhánh `main` hiện có trên GitHub. Để chạy commit khác, cập nhật nhánh `main` trước.
+2. Repo hiện public nên không cần cấu hình GitHub Secret hoặc token.
 3. Chọn runtime có GPU. Notebook sẽ dừng nếu CUDA không có; loại GPU/VRAM được ghi nhận khi có.
 4. Chạy cell tuần tự. Mặc định Drive được mount qua giao diện Colab và artifacts lưu ở `MyDrive/kids-story-runs/m3/<run_id>`. Nếu tắt `SAVE_TO_DRIVE`, output nằm trong runtime tạm thời.
 5. Chỉ coi artifact hợp lệ khi `COMPLETE.json` có mặt và các hash trong đó được notebook xác minh. `completed_with_errors` không phải baseline đầy đủ.

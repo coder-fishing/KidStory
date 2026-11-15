@@ -5,7 +5,7 @@
 
 **Goal:** Produce a reproducible, traceable baseline run of the pinned Qwen2.5-3B-Instruct model on development cases from Colab.
 
-**Architecture:** Keep validation, prompt assembly, generation orchestration and artifact writing in a Python module. Keep the Colab notebook limited to private-repository access, runtime checks, dependency setup and calling the module. M3 uses Transformers for the base-model baseline; Unsloth is reserved for M4 QLoRA.
+**Architecture:** Keep validation, prompt assembly, generation orchestration and artifact writing in a Python module. Keep the Colab notebook limited to cloning the public main branch, runtime checks, dependency setup and calling the module. M3 uses Transformers for the base-model baseline; Unsloth is reserved for M4 QLoRA.
 
 **Tech Stack:** Python standard library for orchestration and tests; PyTorch, Transformers and Accelerate on a Colab GPU; JSONL inputs and outputs; Jupyter notebook format.
 
@@ -35,7 +35,7 @@
 - `tests/test_baseline.py`: verify input rules, message isolation, output states and artifact integrity without loading weights.
 - `tests/fixtures/baseline_dev_synthetic.jsonl`: clearly synthetic rows for baseline-runner logic tests; never used for training or model quality claims.
 - `requirements/m3-colab.lock.txt`: exact M3 package versions compatible with the selected Colab runtime; record the runtime-provided PyTorch version and avoid silently replacing it.
-- `notebooks/m3_baseline_colab.ipynb`: authenticate to the user's private repository through a Colab Secret, check GPU and runtime, load the pinned dependencies, configure paths and call the Python module.
+- `notebooks/m3_baseline_colab.ipynb`: clone the public main branch without a token, check GPU and runtime, load the pinned dependencies, configure paths and call the Python module.
 - `docs/COLAB_RUNBOOK.md`: replace prospective M3 instructions with the notebook flow and actual verified commands; keep M4/Unsloth instructions separate.
 - `docs/AI_DESIGN.md`: record the fixed M3 model revision, license scope, baseline settings and M4 Unsloth boundary.
 - `docs/EXPERIMENT_LOG.md`: record an actual run only after the user runs the notebook; until then, leave run results empty and state that Colab generation has not been executed.
@@ -163,7 +163,7 @@ Test cases:
 - notebook file is valid JSON with ordered setup, environment-check and run sections
 - no-GPU runtime -> notebook stops before model loading and marks no generation as run
 - missing required dependency -> notebook reports the missing package and stops before model loading
-- private-repository access is configured through a Colab Secret -> token is not shown in cell output, logs or URLs
+- public repository is cloned from main without credentials
 - Unsloth appears only in the documented M4 scope and is not installed/imported for M3
 - pinned model ID/revision, prompt paths and output path configuration -> match the approved spec
 
@@ -173,9 +173,9 @@ Run `python -m unittest discover -s tests -p test_baseline.py -v`.
 
 - [x] **Step 3: Create the thin Colab workflow and locked environment**
 
-The notebook proceeds in this order: authenticate to the private repository without printing credentials; record the source commit; check Python, existing PyTorch, CUDA, GPU type and available VRAM; stop if no GPU is available; install only the locked M3 inference dependencies; verify package versions; mount Drive through the Colab interface when durable storage is selected; configure a new output directory; call the Python runner; verify output hashes.
+The notebook proceeds in this order: clone the public main branch without credentials; record the source commit; check Python, existing PyTorch, CUDA, GPU type and available VRAM; stop if no GPU is available; install only the locked M3 inference dependencies; verify package versions; mount Drive through the Colab interface when durable storage is selected; configure a new output directory; call the Python runner; verify output hashes.
 
-Keep Colab-provided PyTorch unless an incompatibility is demonstrated and the replacement is explicitly recorded. Do not use Hugging Face tokens for this public model. Do not mount or upload data beyond the development input and run outputs. Do not install Unsloth in M3. If an authentication secret or GPU is absent, stop before reading cases or loading model weights and display a specific instruction. Save verified run artifacts to the user-selected Drive path when mounted; otherwise leave them in the configured runtime path and clearly state that Colab storage is temporary.
+Keep Colab-provided PyTorch unless an incompatibility is demonstrated and the replacement is explicitly recorded. Do not use Hugging Face tokens for this public model. Do not mount or upload data beyond the development input and run outputs. Do not install Unsloth in M3. If repository cloning or GPU checks fail, stop before reading cases or loading model weights and display a specific instruction. Save verified run artifacts to the user-selected Drive path when mounted; otherwise leave them in the configured runtime path and clearly state that Colab storage is temporary.
 
 Update the runbook, AI design and experiment log to distinguish implemented notebook behaviour from a model run not yet executed. README commands must be added only after those commands have actually run in the corresponding environment.
 

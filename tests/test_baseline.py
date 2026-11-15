@@ -326,13 +326,13 @@ class ColabNotebookContractTests(unittest.TestCase):
             self.fail("M3 Colab notebook has not been created")
         return json.loads(path.read_text(encoding="utf-8"))
 
-    def test_notebook_is_valid_and_orders_auth_runtime_install_and_run(self):
+    def test_notebook_is_valid_and_orders_setup_runtime_install_and_run(self):
         notebook = self.notebook()
         self.assertEqual(notebook["nbformat"], 4)
         cells = notebook["cells"]
         sources = ["".join(cell["source"]) for cell in cells]
         headings = [source for source in sources if source.lstrip().startswith("#")]
-        required = ["1. Cấu hình", "2. Truy cập repo", "3. Kiểm tra GPU", "4. Cài dependencies", "5. Chạy baseline"]
+        required = ["1. Cấu hình", "2. Tải mã nguồn công khai", "3. Kiểm tra GPU", "4. Cài dependencies", "5. Chạy baseline"]
         joined = "\n".join(headings)
         positions = [joined.index(heading) for heading in required]
         self.assertEqual(positions, sorted(positions))
@@ -344,16 +344,14 @@ class ColabNotebookContractTests(unittest.TestCase):
         self.assertIn("PackageNotFoundError", combined)
         self.assertTrue(all(not cell.get("outputs") for cell in cells if cell["cell_type"] == "code"))
 
-    def test_notebook_uses_secret_without_exposing_credentials_or_unsloth(self):
+    def test_notebook_clones_public_main_without_credentials_or_unsloth(self):
         notebook = self.notebook()
         sources = "\n".join("".join(cell["source"]) for cell in notebook["cells"])
-        self.assertIn("userdata.get(\"GITHUB_TOKEN\")", sources)
-        self.assertIn("GIT_ASKPASS", sources)
-        self.assertIn('BRANCH = "codex/m3"', sources)
-        self.assertNotIn("github_pat_", sources)
-        self.assertNotIn("ghp_", sources)
-        self.assertNotIn("GITHUB_TOKEN@", sources)
-        self.assertNotIn("x-access-token@", sources)
+        self.assertIn('BRANCH = "main"', sources)
+        self.assertIn('["git", "clone"', sources)
+        self.assertNotIn("GITHUB_TOKEN", sources)
+        self.assertNotIn("GIT_ASKPASS", sources)
+        self.assertNotIn("userdata", sources)
         self.assertNotIn("pip install unsloth", sources.lower())
         self.assertNotIn("import unsloth", sources.lower())
         self.assertNotIn("huggingface.co/", sources.lower())

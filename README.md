@@ -91,7 +91,7 @@ Không dùng golden draft để chỉnh prompt. Người duyệt cần đọc [R
 
 ## M3 baseline Colab — triển khai, chưa chạy model thật
 
-Runner nằm ở `src/kids_story/baseline.py`; notebook là [notebooks/m3_baseline_colab.ipynb](notebooks/m3_baseline_colab.ipynb). Notebook dùng model `Qwen/Qwen2.5-3B-Instruct` tại revision cố định, dùng `data/evaluation/dev_cases.jsonl` cùng `prompts/story_system_v1.txt`, yêu cầu GPU CUDA và giữ PyTorch do Colab cung cấp. Repo private được clone qua Colab Secret `GITHUB_TOKEN`; token không nằm trong URL/cell output. Outputs mặc định ghi vào Google Drive và được kiểm tra hash. M3 không dùng Unsloth; Unsloth dự kiến cho M4 QLoRA.
+Runner nằm ở `src/kids_story/baseline.py`; notebook là [notebooks/m3_baseline_colab.ipynb](notebooks/m3_baseline_colab.ipynb). Notebook dùng model `Qwen/Qwen2.5-3B-Instruct` tại revision cố định, dùng `data/evaluation/dev_cases.jsonl` cùng `prompts/story_system_v1.txt`, yêu cầu GPU CUDA và giữ PyTorch do Colab cung cấp. Repo hiện public và được clone trực tiếp từ nhánh `main`; không cần GitHub Secret hoặc token. Outputs mặc định ghi vào Google Drive và được kiểm tra hash. M3 không dùng Unsloth; Unsloth dự kiến cho M4 QLoRA.
 
 Các lệnh kiểm tra cục bộ đã chạy trong PowerShell (không tải model, không dùng GPU):
 
