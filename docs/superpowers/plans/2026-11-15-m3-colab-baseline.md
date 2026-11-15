@@ -185,7 +185,7 @@ Run `python -m json.tool notebooks/m3_baseline_colab.ipynb` and `python -m unitt
 
 Expected: notebook parses, all M1/M2 and new baseline tests pass, docs label actual local checks and unrun Colab generation separately.
 
-- [ ] **Step 5: Commit Task 3**
+- [x] **Step 5: Commit Task 3**
 
 Commit subject: `[2026-11-15-m3-colab-baseline] Add Colab baseline notebook and runbook`
 
