@@ -99,7 +99,7 @@ Commit trailer: `Plan: docs/superpowers/plans/2026-11-15-m3-colab-baseline.md` a
 - Consumes: validated cases/messages from Task 1 and a model backend that can be replaced with a fake backend during tests.
 - Produces: one result record per input ID, `run_config.json`, and a verified completion manifest when the run is exhaustive.
 
-- [ ] **Step 1: Write failing generation and artifact tests**
+- [x] **Step 1: Write failing generation and artifact tests**
 
 Test cases:
 
@@ -115,11 +115,11 @@ Test cases:
 - changed system prompt or input file -> resulting run configuration has a different corresponding hash
 - existing run output directory -> rejected without changing its files
 
-- [ ] **Step 2: Run focused tests and confirm generation/artifact cases fail**
+- [x] **Step 2: Run focused tests and confirm generation/artifact cases fail**
 
 Run `python -m unittest discover -s tests -p test_baseline.py -v`.
 
-- [ ] **Step 3: Add the pinned Transformers generation path**
+- [x] **Step 3: Add the pinned Transformers generation path**
 
 Unit: `run_baseline` in `src/kids_story/baseline.py`.
 - Takes: validated cases, fixed model ID/revision, generation settings and a new output path.
@@ -130,12 +130,12 @@ The model prompt is exactly the existing system prompt plus the dev case's `prom
 
 Write `generations.jsonl` with one success or error record per input, `run_config.json` with model/tokenizer revision, commit, prompt/input hashes, runtime/dependency/GPU details and effective generation settings. Write `COMPLETE.json` only after every input is represented and the required hashes match. Use `complete` when every case succeeded and `completed_with_errors` when every case was attempted but at least one failed.
 
-- [ ] **Step 4: Run focused and regression tests**
+- [x] **Step 4: Run focused and regression tests**
 
 Run `python -m unittest discover -s tests -p test_baseline.py -v` and `python -m unittest discover -s tests -v`.
 Expected: success/error records and completion states match the cases above; all M1/M2 tests still pass.
 
-- [ ] **Step 5: Commit Task 2**
+- [x] **Step 5: Commit Task 2**
 
 Commit subject: `[2026-11-15-m3-colab-baseline] Add pinned Qwen baseline generation and artifacts`
 
