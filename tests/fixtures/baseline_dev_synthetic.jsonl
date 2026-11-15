@@ -1,0 +1,2 @@
+{"id":"SYN-DEV-001","prompt":"Viết truyện về một bạn nhỏ cùng bạn chia sẻ màu vẽ.","expected_behavior":["Câu trả lời phải là truyện."],"constraints":{"length_min":150},"rubric_ids":["R1"],"review_notes":"Dữ liệu tổng hợp để kiểm thử; không dùng làm đầu vào mô hình.","fixture_synthetic":true}
+{"id":"SYN-DEV-002","prompt":"Viết truyện về một chú chim tìm đường về tổ.","expected_behavior":["Kết thúc an toàn."],"constraints":{"length_min":150},"rubric_ids":["R2"],"review_notes":"Dữ liệu tổng hợp để kiểm thử; không dùng làm đầu vào mô hình.","fixture_synthetic":true}

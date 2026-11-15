@@ -1,0 +1,3 @@
+# M3 Colab inference dependencies. PyTorch is supplied and recorded by the selected Colab runtime.
+transformers==4.57.3
+accelerate==1.12.0
