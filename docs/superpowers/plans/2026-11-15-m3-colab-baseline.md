@@ -60,8 +60,6 @@ Test cases:
 - missing, malformed, blank or duplicate IDs -> rejected before any model load
 - missing, non-text or blank `prompt` -> rejected before any model load
 - valid row containing `expected_behavior`, rubric and constraints -> model messages include only the fixed system text and `prompt`
-- changed system prompt or input file -> resulting run configuration has a different corresponding hash
-- existing run output directory -> rejected without changing its files
 
 - [ ] **Step 2: Run the focused tests and confirm the new cases fail**
 
@@ -114,6 +112,8 @@ Test cases:
 - model load or GPU check fails before generation -> no completion manifest is written
 - token budget is reached -> raw partial output and finish reason are kept without automatic continuation
 - output text is preserved exactly as returned by the model
+- changed system prompt or input file -> resulting run configuration has a different corresponding hash
+- existing run output directory -> rejected without changing its files
 
 - [ ] **Step 2: Run focused tests and confirm generation/artifact cases fail**
 
