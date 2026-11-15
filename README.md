@@ -89,6 +89,34 @@ Kết quả: 0 cặp gần trùng ứng viên; SFT có 90 train/10 validation. K
 
 Không dùng golden draft để chỉnh prompt. Người duyệt cần đọc [REVIEW_GUIDE](data/evaluation/REVIEW_GUIDE.md) trước khi mở tập test.
 
+## EDA song ngữ quy mô lớn (CPU)
+
+`python -m kids_story.data.source` hỗ trợ thêm `--method random_blocks` để lấy mẫu cụm có seed từ revision bất biến. Dataset Viewer chỉ trả tối đa 100 dòng mỗi request; sampler chọn các block 100 dòng rải trên split, kiểm tra header revision ở từng request và giới hạn tối đa 10.000 dòng. Đây là **cluster sample**, không phải IID random sample từng dòng; report phải được hiểu theo giới hạn đó. Không tải toàn bộ dataset. Lệnh dưới đây là cách chạy sau khi xác nhận revision/quyền sử dụng; chưa chạy lấy 10.000 dòng nguồn thật trong lần cập nhật mã này:
+
+```powershell
+$env:PYTHONPATH = (Resolve-Path src).Path
+# Chạy thử quy trình với 1.000 mẫu trước
+python -m kids_story.data.source --revision eb37a7aa8cc44ad9841175163a460fed5c2c1b24 --method random_blocks --limit 1000 --seed 42 --output-dir data/raw/hf_random_blocks1k
+python -m kids_story.data.m2 eda --input data/raw/hf_random_blocks1k/sample.jsonl --source-manifest data/raw/hf_random_blocks1k/source_manifest.json --output-dir outputs/m2_eda_random_blocks1k_v1
+# Khi quy trình ổn, đổi limit/output-dir thành 10000/m2_eda_random_blocks10k_v1
+python -m kids_story.data.source --revision eb37a7aa8cc44ad9841175163a460fed5c2c1b24 --method random_blocks --limit 10000 --seed 42 --output-dir data/raw/hf_random_blocks10k
+python -m kids_story.data.m2 eda --input data/raw/hf_random_blocks10k/sample.jsonl --source-manifest data/raw/hf_random_blocks10k/source_manifest.json --output-dir outputs/m2_eda_random_blocks10k_v1
+```
+
+EDA chỉ phân tích snapshot đã lấy và không sửa truyện. Tạo `eda_report.json`, `eda_manifest.json`, `name_candidates.csv`, `translation_candidates.csv` và `COMPLETE.json`. CSV gợi ý dùng UTF-8 BOM, mọi dòng có `review_status=pending`; heuristic tên/dịch sát không xác nhận nội dung. Khi đổi input hoặc revision, tạo thư mục output mới; CLI từ chối ghi đè. Có thể kiểm tra logic offline bằng fixture tổng hợp `tests/fixtures/eda_stories.jsonl`, không phải dữ liệu huấn luyện.
+
+Muốn chạy toàn bộ luồng trên Colab, mở [notebook M2 EDA](notebooks/m2_eda_colab.ipynb). Notebook clone `main`, dùng CPU và lưu snapshot/report vào Google Drive; commit cần chạy phải được push lên GitHub trước khi clone. Mỗi run có `run.log`, `run_config.json`, `COMPLETE.json` và ba ảnh PNG về độ dài, thống kê dữ liệu, tần suất ứng viên. Notebook chưa được thực thi trên runtime Colab thật.
+
+Kiểm tra offline đã chạy trong lần cập nhật này:
+
+```powershell
+$env:PYTHONPATH = (Resolve-Path src).Path
+python -m unittest discover -s tests -v
+python -m kids_story.data.m2 eda --input tests/fixtures/eda_stories.jsonl --output-dir outputs/m2_eda_fixture_smoke_final
+```
+
+Kết quả: **46 tests đạt**; lệnh CLI fixture đọc 4 dòng tổng hợp và xuất 3 dòng ứng viên tên cùng 3 dòng ứng viên dịch sát. Không lấy dữ liệu nguồn thật, không tạo SFT và không chạy GPU trong lần kiểm tra này.
+
 ## M3 baseline Colab — đã chạy baseline model gốc
 
 Runner nằm ở `src/kids_story/baseline.py`; notebook là [notebooks/m3_baseline_colab.ipynb](notebooks/m3_baseline_colab.ipynb). Notebook dùng model `Qwen/Qwen2.5-3B-Instruct` tại revision cố định, dùng `data/evaluation/dev_cases.jsonl` cùng `prompts/story_system_v1.txt`, yêu cầu GPU CUDA và giữ PyTorch do Colab cung cấp. Repo hiện public và được clone trực tiếp từ nhánh `main`; không cần GitHub Secret hoặc token. Outputs mặc định ghi vào Google Drive và được kiểm tra hash. M3 không dùng Unsloth; Unsloth dự kiến cho M4 QLoRA.

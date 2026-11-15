@@ -3,10 +3,10 @@
 import re
 from collections import Counter
 
-# Illustrative user examples; suggestions only, never applied to story text.
+# User-approved mapping suggestions; never applied to story text automatically.
 VI_NAME_SUGGESTIONS = {"sue": "Xuân", "tom": "Tâm", "jerry": "Gia Huy",
-                       "amy": "Trà My", "lily": "Ly"
-                       }
+                       "amy": "Trà My", "lily": "Ly", "tim": "Tín",
+                       "buddy": "Bắp", "max": "Mã"}
 STOP = {"once", "there", "one", "then", "but", "they", "now", "everyone", "the",
         "in", "as", "it", "he", "she", "we", "my", "his", "her", "this", "after",
         "finally", "suddenly", "when", "what", "hello", "hi", "thank", "thankyou"}
@@ -32,7 +32,7 @@ def suggest_names(english: str) -> dict:
     names = sorted((n for n, score in evidence.items() if score >= 2), key=str.casefold)
     suggestions = [{"source": name,
                     "vietnamese_suggestion": VI_NAME_SUGGESTIONS.get(name.casefold(), name),
-                    "basis": "illustrative_user_mapping" if name.casefold() in VI_NAME_SUGGESTIONS else "keep_original_pending_review"}
+                    "basis": "user_approved_mapping_v2_candidate_only" if name.casefold() in VI_NAME_SUGGESTIONS else "keep_original_pending_review"}
                    for name in names]
     return {"source_names": names, "suggestions": suggestions,
             "method": "pattern_and_repeated_capitalization_heuristic_v1"}

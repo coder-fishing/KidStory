@@ -8,6 +8,7 @@ import statistics
 from pathlib import Path
 
 from .io import digest, write_json, write_jsonl
+from .eda import run_eda
 from .near import export_pairs, screen
 from .process import summarize
 from .review import candidates, export_review, import_review, load_records
@@ -59,6 +60,10 @@ def main() -> int:
     prep.add_argument("--seed", type=int, default=42)
     prep.add_argument("--threshold", type=float, default=.65)
     prep.add_argument("--ngram", type=int, default=3)
+    eda = commands.add_parser("eda", help="Describe a bilingual JSONL snapshot and export review candidates")
+    eda.add_argument("--input", type=Path, required=True)
+    eda.add_argument("--output-dir", type=Path, required=True)
+    eda.add_argument("--source-manifest", type=Path)
     review = commands.add_parser("import-review")
     review.add_argument("--input", type=Path, required=True)
     review.add_argument("--csv", type=Path, required=True)
@@ -88,6 +93,12 @@ def main() -> int:
             result = prepare(args.input, args.output_dir, sample_size=args.sample_size,
                              seed=args.seed, threshold=args.threshold, ngram=args.ngram)
             result = {k: result[k] for k in ["sample_size", "population_rows", "near_candidate_pairs"]}
+        elif args.command == "eda":
+            report = run_eda(args.input, args.output_dir, args.source_manifest)
+            result = {"input_rows": report["input_rows"],
+                      "name_candidate_rows": report["name_candidate_rows"],
+                      "translation_calque_candidate_rows": report["translation_calque_candidate_rows"],
+                      "output_dir": str(args.output_dir)}
         else:
             rows = load_records(args.input)
             if args.command == "export-review":

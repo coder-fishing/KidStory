@@ -1,16 +1,16 @@
 # Kế hoạch dữ liệu
 
-Trạng thái cập nhật M2 — 2026-11-15: batch 100 mẫu tại revision `eb37a7aa8cc44ad9841175163a460fed5c2c1b24` có 100/100 approval hợp lệ; gần trùng chạy lại trên batch cho 0 cặp ở ngưỡng 0.65/ngram 3; SFT CPU đã xuất 90 train/10 validation. Một batch chỉnh sửa 30 mẫu khác có 24 approved và 6 pending. Ledger quyền dùng được đặt `confirmed` theo xác nhận người dùng, nhưng tài liệu cấp phép/chi tiết phạm vi chưa được kiểm chứng độc lập trong repo. Near trên mẫu nhỏ không chứng minh toàn nguồn sạch. Xem SOURCE_AUDIT, M2_REPORT và M2_REVIEW_GUIDE; các đề xuất mở rộng dưới đây chưa mặc định là đã thực hiện.
+Trạng thái cập nhật M2 — 2026-11-15: batch 100 mẫu tại revision `eb37a7aa8cc44ad9841175163a460fed5c2c1b24` có 100/100 approval hợp lệ; gần trùng chạy lại trên batch cho 0 cặp ở ngưỡng 0.65/ngram 3; SFT CPU đã xuất 90 train/10 validation. Một batch chỉnh sửa 30 mẫu khác có 24 approved và 6 pending. Ledger quyền dùng được đặt `confirmed` theo xác nhận người dùng, nhưng tài liệu cấp phép/chi tiết phạm vi chưa được kiểm chứng độc lập trong repo. Near trên mẫu nhỏ không chứng minh toàn nguồn sạch. Người dùng chốt mục tiêu mở rộng là 10.000 mẫu train đã duyệt; bắt đầu kiểm tra quy trình trên 1.000 mẫu. Đây là mục tiêu tương lai, chưa phải dữ liệu/artifact đã có. Xem SOURCE_AUDIT, M2_REPORT và M2_REVIEW_GUIDE.
 
 ## Cổng xác minh nguồn
 
 Ứng viên [nampdn-ai/tinystories-vietnamese](https://huggingface.co/datasets/nampdn-ai/tinystories-vietnamese). Tra cứu card/viewer sơ bộ ngày 2026-11-14 thấy nhãn MIT và các cột `en`, `vi`; đây chỉ là quan sát giao diện, **chưa xác minh schema tại revision cố định**, nguồn bản dịch hoặc toàn bộ quyền sử dụng. Trước khi lấy dữ liệu thực: ghi commit revision bất biến, config/split/features, kiểm tra kiểu/null bằng mẫu nhỏ; đọc LICENSE/card tại revision đó, truy nguồn TinyStories gốc và quy trình dịch, ghi phần chưa rõ. Nếu chưa đủ cơ sở quyền sử dụng thì dừng xuất dữ liệu huấn luyện và xin hướng dẫn; không suy diễn nhãn Hub thành kết luận pháp lý.
 
-## Lấy mẫu và EDA đề xuất cho M1/M2
+## Lấy mẫu và EDA cho M1/M2
 
-M1 tách tải mẫu nguồn khỏi xử lý cục bộ. Dùng fixture minh họa để phát triển offline trước. Khi nguồn đã xác minh, đề xuất reservoir sample 500 hàng với seed 42 trên split/revision cố định; ghi thuật toán, thứ tự duyệt, số hàng đã duyệt, sample IDs và hash. Không gọi `take(500)` là mẫu ngẫu nhiên. Nếu streaming không truy cập ổn định, lưu snapshot nhỏ và dùng snapshot đã hash để tái lập. Không tải toàn bộ nguồn ở M0.
+Snapshot prefix100 hiện có chỉ là dữ liệu phát triển ban đầu, không đại diện nguồn. Module nguồn hỗ trợ `random_blocks`: lấy các block 100 hàng bằng seed từ revision đã khóa, giới hạn 10.000 hàng, kiểm tra revision ở từng phản hồi và lưu row IDs/hash. Đây là cluster sample, không phải IID random sample từng hàng; cần báo cáo giới hạn cụm. Không tải toàn bộ dataset.
 
-EDA thống kê null/kiểu dữ liệu, độ dài ký tự, đơn vị cách trắng, phân bố dấu câu, dấu hiệu ngoại ngữ, lặp và tỷ lệ cờ. Đề xuất người đọc 50 mẫu: 30 chọn ngẫu nhiên từ sample và 20 theo cờ/độ dài bất thường; báo hai nhóm riêng để tránh coi mẫu có chủ đích là tỷ lệ đại diện. Dùng tokenizer đúng revision ở milestone sau để đo **model token**, không ép pipeline CPU M1 phụ thuộc model weights.
+Mục tiêu người dùng đã chốt: EDA một pool khoảng 10.000 ứng viên hướng tới 10.000 mẫu train đã duyệt; chạy thử quy trình trên 1.000 mẫu trước. Nếu mẫu bị loại thì cần lấy bổ sung để đạt mục tiêu cuối. Chưa tạo snapshot 1.000/10.000 từ nguồn thật. Lệnh EDA hiện thống kê schema kiểu/null/rỗng, độ dài ký tự và đơn vị cách trắng, dấu câu, ký tự điều khiển/chữ ngoài Latin, exact duplicate, nhóm nguồn, dấu hiệu cắt cụt/lặp; xuất các ứng viên tên và dịch sát vào CSV pending. Các heuristic không phải nhãn chất lượng/ngôn ngữ, không thay đổi text. Dùng tokenizer đúng revision ở milestone sau để đo **model token**, không ép pipeline CPU M1 phụ thuộc model weights.
 
 ## Bản ghi trung gian dự kiến
 

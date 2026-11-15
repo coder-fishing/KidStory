@@ -1,6 +1,7 @@
 """M2 integration tests: all review identities/approvals here are SYNTHETIC."""
 
 import copy
+import ast
 import json
 import sys
 import tempfile
@@ -9,12 +10,15 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
-from kids_story.data.io import read_jsonl, write_jsonl
+from kids_story.data.io import digest, read_jsonl, write_jsonl
+from kids_story.data.eda import run_eda
 from kids_story.data.m2 import prepare
+from kids_story.data.names import suggest_names
 from kids_story.data.near import PAIR_COLUMNS, confirmed_edges, export_pairs, screen
 from kids_story.data.process import process_rows
 from kids_story.data.review import (EDITABLE, READONLY, export_review, import_review,
     load_records, read_csv, validate_approval, write_csv)
+from kids_story.data.source import _sample_block_indices
 from kids_story.data.sft import export_sft, lineage_groups
 
 
@@ -208,6 +212,94 @@ class M2Tests(unittest.TestCase):
         c = prepare(reversed_path, self.p / "c", sample_size=3, seed=9)
         self.assertEqual(a["selected_audit_ids"], c["selected_audit_ids"])
         with self.assertRaises(ValueError): prepare(p, self.p / "huge", sample_size=201)
+
+    def test_random_block_selection_is_seeded_bounded_and_not_prefix(self):
+        first = _sample_block_indices(26000, 10000, 42)
+        self.assertEqual(first, _sample_block_indices(26000, 10000, 42))
+        self.assertEqual(len(first), 100)
+        self.assertEqual(len(set(first)), 100)
+        self.assertNotEqual(first, list(range(100)))
+        with self.assertRaises(ValueError): _sample_block_indices(99, 100, 42)
+        with self.assertRaises(ValueError): _sample_block_indices(1000, 150, 42)
+
+    def test_eda_outputs_bilingual_candidates_and_keeps_input_unchanged(self):
+        input_path = ROOT / "tests/fixtures/eda_stories.jsonl"
+        before = input_path.read_bytes()
+        output = self.p / "eda"
+        report = run_eda(input_path, output)
+        self.assertEqual(report["input_rows"], 4)
+        self.assertEqual(report["field_summary"]["vi"]["empty_or_whitespace_count"], 1)
+        self.assertEqual(len(report["exact_duplicate_groups_vi"]), 1)
+        self.assertEqual(report["name_candidate_rows"], 3)
+        self.assertEqual(report["translation_calque_candidate_rows"], 3)
+        self.assertEqual(input_path.read_bytes(), before)
+        names = read_csv(output / "name_candidates.csv", [
+            "source_id", "source_name_en", "suggestion_vi", "basis", "source_text_en",
+            "source_text_vi", "review_status", "review_notes"])
+        phrases = read_csv(output / "translation_candidates.csv", [
+            "source_id", "rule_id", "english_phrase", "vietnamese_phrase", "english_context",
+            "vietnamese_context", "suggestion", "reason", "review_status", "review_notes"])
+        self.assertTrue(all(row["review_status"] == "pending" for row in names + phrases))
+        complete = json.loads((output / "COMPLETE.json").read_text(encoding="utf-8"))
+        self.assertTrue(complete)
+        for filename, expected_hash in complete.items():
+            self.assertEqual(digest((output / filename).read_bytes()), expected_hash)
+        with self.assertRaisesRegex(ValueError, "refusing overwrite"):
+            run_eda(input_path, output)
+
+    def test_eda_rejects_stale_source_manifest(self):
+        input_path = ROOT / "tests/fixtures/eda_stories.jsonl"
+        manifest = self.p / "source_manifest.json"
+        manifest.write_text(json.dumps({"artifact_sha256": {"sample.jsonl": "0" * 64}}), encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "does not match"):
+            run_eda(input_path, self.p / "bad_manifest_eda", manifest)
+
+    def test_eda_checks_source_manifest_revision_and_indices(self):
+        from kids_story.data.io import digest
+        input_path = ROOT / "tests/fixtures/eda_stories.jsonl"
+        entries = read_jsonl(input_path)
+        ids = [entry["value"]["source_row_id"] for entry in entries]
+        manifest = self.p / "source_manifest_valid.json"
+        manifest.write_text(json.dumps({
+            "artifact_sha256": {"sample.jsonl": digest(input_path.read_bytes())},
+            "resolved_revision": "fixture-revision",
+            "sampling": {"row_indices": ids},
+        }), encoding="utf-8")
+        report = run_eda(input_path, self.p / "eda_manifest_valid", manifest)
+        self.assertEqual(report["source_manifest"]["resolved_revision"], "fixture-revision")
+        with self.assertRaisesRegex(ValueError, "row indices"):
+            changed = json.loads(manifest.read_text(encoding="utf-8"))
+            changed["sampling"]["row_indices"] = list(reversed(ids))
+            manifest.write_text(json.dumps(changed), encoding="utf-8")
+            run_eda(input_path, self.p / "eda_manifest_stale_indices", manifest)
+
+    def test_approved_name_mappings_are_suggestions_only(self):
+        result = suggest_names("The boy named Tim met a friend named Buddy and another named Max.")
+        suggestions = {row["source"].casefold(): row for row in result["suggestions"]}
+        self.assertEqual(suggestions["tim"]["vietnamese_suggestion"], "Tín")
+        self.assertEqual(suggestions["buddy"]["vietnamese_suggestion"], "Bắp")
+        self.assertEqual(suggestions["max"]["vietnamese_suggestion"], "Mã")
+        self.assertTrue(all(row["basis"] == "user_approved_mapping_v2_candidate_only"
+                            for row in suggestions.values()))
+
+    def test_m2_eda_notebook_is_valid_thin_cpu_runner(self):
+        path = ROOT / "notebooks/m2_eda_colab.ipynb"
+        notebook = json.loads(path.read_text(encoding="utf-8"))
+        self.assertEqual(notebook["nbformat"], 4)
+        code_cells = ["".join(cell["source"]) for cell in notebook["cells"]
+                      if cell["cell_type"] == "code"]
+        self.assertTrue(code_cells)
+        for source in code_cells:
+            ast.parse(source)
+        combined = "\n".join(code_cells)
+        self.assertIn("sample_source(", combined)
+        self.assertIn("run_eda(", combined)
+        self.assertIn("SAMPLE_SIZE = 1000", combined)
+        self.assertIn("savefig(", combined)
+        self.assertIn("run.log", combined)
+        self.assertIn("run_config.json", combined)
+        self.assertIn("COMPLETE.json", combined)
+        self.assertNotIn("HF_TOKEN", combined)
 
 
 if __name__ == "__main__":

@@ -16,7 +16,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from kids_story.data.io import digest, read_jsonl, write_jsonl
 from kids_story.data.pipeline import run_pipeline
 from kids_story.data.process import normalize_text, process_rows
-from kids_story.data.source import sample_source
+from kids_story.data.source import _sample_block_indices, sample_source
 
 
 def temporary_workspace():
@@ -202,6 +202,30 @@ class SourceTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     sample_source(p, revision="a" * 40, limit=1)
                 self.assertFalse(p.exists())
+
+    def test_source_random_block_sample_uses_seeded_nonprefix_blocks(self):
+        rev = "a" * 40
+        blocks = _sample_block_indices(1000, 100, 42)
+        offset = blocks[0] * 100
+        first_rows = [{"row_idx": 0, "row": {"en": "probe", "vi": "mẫu"}, "truncated_cells": []}]
+        sampled_rows = [{"row_idx": offset + i, "row": {"en": f"Story {offset+i}", "vi": f"Truyện {offset+i}."},
+                         "truncated_cells": []} for i in range(100)]
+        common = {"features": [{"name": k, "type": {"dtype": "string"}} for k in ["en", "vi"]]}
+        responses = [
+            (json.dumps({"sha": rev, "cardData": {"license": "mit"}}).encode(), {}),
+            (b"license: mit", {"x-repo-commit": rev}),
+            (json.dumps({**common, "num_rows_total": 1000, "rows": first_rows}).encode(), {"x-revision": rev}),
+            (json.dumps({**common, "num_rows_total": 1000, "rows": sampled_rows}).encode(), {"x-revision": rev}),
+        ]
+        with temporary_workspace() as tmp, patch("kids_story.data.source._get", side_effect=responses):
+            output = Path(tmp) / "source"
+            manifest = sample_source(output, revision=rev, limit=100, method="random_blocks", seed=42)
+            self.assertEqual(manifest["sampling"]["method"], "seeded_random_contiguous_blocks_cluster_sample_v1")
+            self.assertNotEqual(manifest["sampling"]["selected_block_indices"], [0])
+            self.assertEqual(len(manifest["sampling"]["row_indices"]), 100)
+            self.assertEqual(manifest["sampling"]["row_indices"][0], offset)
+            self.assertIn("not an IID row sample", manifest["sampling"]["sampling_note"])
+            self.assertEqual(manifest["viewer_response_evidence"][-1]["offset"], offset)
 
 
 if __name__ == "__main__":
