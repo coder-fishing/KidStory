@@ -1,8 +1,10 @@
 # Runbook Colab cho M3–M5
 
-## M3 baseline: đã có notebook, chưa chạy trên Colab
+## M3 baseline: run Colab đầu tiên đã hoàn tất
 
 Notebook [m3_baseline_colab.ipynb](../notebooks/m3_baseline_colab.ipynb) clone repo public trực tiếp từ nhánh `main`, ghi commit, yêu cầu GPU CUDA, cài các dependency pin trong [m3-colab.lock.txt](../requirements/m3-colab.lock.txt), mount Drive theo mặc định rồi gọi `kids_story.baseline.run_baseline`. PyTorch do Colab cung cấp được giữ nguyên và ghi vào `run_config.json`. Notebook không cài Unsloth, không cần Hugging Face token cho model public và không đọc golden draft.
+
+Run `qwen25_3b_20261115T045801Z` đã chạy thành công với Qwen2.5-3B-Instruct trên Tesla T4: 20/20 dev case thành công, 0 lỗi, hashes được xác minh. Artifact: `MyDrive/kids-story-runs/m3/qwen25_3b_20261115T045801Z`. `DEV019` kết thúc do đạt giới hạn 512 token; cần giữ nguyên finish reason khi phân tích. Chi tiết cấu hình và hashes ở [EXPERIMENT_LOG](EXPERIMENT_LOG.md).
 
 Trước khi mở notebook:
 
@@ -12,7 +14,7 @@ Trước khi mở notebook:
 4. Chạy cell tuần tự. Mặc định Drive được mount qua giao diện Colab và artifacts lưu ở `MyDrive/kids-story-runs/m3/<run_id>`. Nếu tắt `SAVE_TO_DRIVE`, output nằm trong runtime tạm thời.
 5. Chỉ coi artifact hợp lệ khi `COMPLETE.json` có mặt và các hash trong đó được notebook xác minh. `completed_with_errors` không phải baseline đầy đủ.
 
-Dependency pins hiện có phiên bản cụ thể nhưng **chưa được smoke test trên runtime Colab**. Notebook phải được chạy thực tế để xác nhận tương thích PyTorch/CUDA/GPU; nếu cài đặt hoặc nạp model lỗi, ghi đúng lỗi và cập nhật lock bằng một lần chạy có truy vết. Không cài Unsloth trong M3; Unsloth thuộc thử nghiệm QLoRA M4.
+Run trên xác nhận dependency pins hoạt động trong đúng runtime đã ghi ở log. Runtime Colab có thể thay đổi; khi dùng runtime khác, ghi phiên bản thực tế và điều tra lỗi tương thích thay vì mặc định rằng cấu hình đã được kiểm chứng trên mọi GPU. Không cài Unsloth trong M3; Unsloth thuộc thử nghiệm QLoRA M4.
 
 ## M4–M5: quy trình dự kiến
 

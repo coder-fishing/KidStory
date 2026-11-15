@@ -6,7 +6,7 @@
 
 ## Hiện trạng M2 — có SFT CPU, còn cổng đánh giá chờ duyệt
 
-Đã có pipeline M1 và công cụ M2 CPU. Batch 100 mẫu được duyệt đã xuất SFT tại `outputs/m2_reviewed_sft_100_v1/` (90 train/10 validation, seed 42); chưa train model. **M2 chưa hoàn tất** vì phiếu rubric còn pending, final holdout chưa được người độc lập duyệt/niêm phong và tài liệu quyền nguồn chưa được kiểm chứng độc lập trong repo. 20 đề dev và 50 golden draft vẫn là draft/pending; chưa có human scores hoặc `golden_test_v1` được duyệt. M3 đã có runner và notebook nhưng chưa chạy baseline trên Colab. Xem [báo cáo M2](docs/M2_REPORT.md) và lịch sử [M1](docs/M1_REPORT.md).
+Đã có pipeline M1 và công cụ M2 CPU. Batch 100 mẫu được duyệt đã xuất SFT tại `outputs/m2_reviewed_sft_100_v1/` (90 train/10 validation, seed 42); chưa train model. **M2 chưa hoàn tất** vì phiếu rubric còn pending, final holdout chưa được người độc lập duyệt/niêm phong và tài liệu quyền nguồn chưa được kiểm chứng độc lập trong repo. 20 đề dev và 50 golden draft vẫn là draft/pending; chưa có human-calibrated scores hoặc `golden_test_v1` được duyệt. M3 baseline đã chạy trên Colab; run chi tiết ở [nhật ký thí nghiệm](docs/EXPERIMENT_LOG.md). Xem [báo cáo M2](docs/M2_REPORT.md) và lịch sử [M1](docs/M1_REPORT.md).
 
 **Bạn đọc tiếp:** [báo cáo M2](docs/M2_REPORT.md). Batch chỉnh sửa 30 mẫu mới có 24 approved và 6 pending tại `outputs/m2_user_approved_import_01/`; batch SFT 100 mẫu là artifact riêng. Ledger ghi quyền sử dụng `confirmed` theo xác nhận của người phụ trách; tài liệu và phạm vi cấp phép chưa được kiểm chứng độc lập trong repo ([rà nguồn](docs/SOURCE_AUDIT.md)).
 
@@ -31,7 +31,7 @@ data/raw/              snapshot khảo sát HF (bị Git ignore)
 outputs/               kết quả chạy và báo cáo (bị Git ignore)
 ```
 
-Đã triển khai phần dữ liệu và xuất hội thoại SFT có điều kiện trong `src/kids_story/data/`. Fine-tune/QLoRA, chấm output mô hình và `app/` Gradio **chưa triển khai**. M3 có module baseline Transformers và notebook Colab mỏng; chưa chạy model thật hoặc tải weights. Không có module rỗng mô phỏng tiến độ.
+Đã triển khai phần dữ liệu và xuất hội thoại SFT có điều kiện trong `src/kids_story/data/`. Fine-tune/QLoRA và `app/` Gradio **chưa triển khai**. M3 có module baseline Transformers và notebook Colab mỏng; baseline Qwen2.5-3B-Instruct đã sinh 20/20 đề dev trong một run Colab. Có bảng điểm AI hỗ trợ trên rubric nháp; chưa có metric chất lượng được hiệu chuẩn hoặc kết luận tổng quát. Không có module rỗng mô phỏng tiến độ.
 
 ## Chạy M1 trên CPU
 
@@ -89,9 +89,11 @@ Kết quả: 0 cặp gần trùng ứng viên; SFT có 90 train/10 validation. K
 
 Không dùng golden draft để chỉnh prompt. Người duyệt cần đọc [REVIEW_GUIDE](data/evaluation/REVIEW_GUIDE.md) trước khi mở tập test.
 
-## M3 baseline Colab — triển khai, chưa chạy model thật
+## M3 baseline Colab — đã chạy baseline model gốc
 
 Runner nằm ở `src/kids_story/baseline.py`; notebook là [notebooks/m3_baseline_colab.ipynb](notebooks/m3_baseline_colab.ipynb). Notebook dùng model `Qwen/Qwen2.5-3B-Instruct` tại revision cố định, dùng `data/evaluation/dev_cases.jsonl` cùng `prompts/story_system_v1.txt`, yêu cầu GPU CUDA và giữ PyTorch do Colab cung cấp. Repo hiện public và được clone trực tiếp từ nhánh `main`; không cần GitHub Secret hoặc token. Outputs mặc định ghi vào Google Drive và được kiểm tra hash. M3 không dùng Unsloth; Unsloth dự kiến cho M4 QLoRA.
+
+Run `qwen25_3b_20261115T045801Z` trên Colab/Tesla T4 hoàn tất: 20/20 mẫu thành công, 0 lỗi, hashes được xác minh. Artifact ở `MyDrive/kids-story-runs/m3/qwen25_3b_20261115T045801Z`; model revision, runtime, cấu hình sinh và hashes được ghi trong [EXPERIMENT_LOG](docs/EXPERIMENT_LOG.md). Một mẫu (`DEV019`) dừng vì chạm `max_new_tokens=512`; trạng thái run vẫn `complete` vì không có lỗi thực thi. Kết quả chỉ là baseline trên tập dev, không phải fine-tune hay đánh giá chất lượng tổng quát. Bảng điểm AI hỗ trợ không thay thế human-calibrated scores; M2 vẫn còn các cổng review riêng.
 
 Các lệnh kiểm tra cục bộ đã chạy trong PowerShell (không tải model, không dùng GPU):
 
@@ -102,7 +104,7 @@ python -m json.tool notebooks/m3_baseline_colab.ipynb
 python -m unittest discover -s tests -v
 ```
 
-Kết quả lần chạy ngày 2026-11-15: **17 test baseline đạt**, JSON notebook hợp lệ, 6 code cells phân tích cú pháp Python được và **39 test toàn repo đạt**. Đây chỉ là kiểm tra logic/JSON trên máy Windows; **không phải** xác nhận dependency cài được trên Colab hay model chạy thành công. Dependency pins tại `requirements/m3-colab.lock.txt` chưa được smoke test trên Colab. Xem [runbook](docs/COLAB_RUNBOOK.md), [thiết kế mô hình](docs/AI_DESIGN.md) và [nhật ký thí nghiệm](docs/EXPERIMENT_LOG.md). M2 vẫn chờ các cổng đánh giá riêng; baseline dev không đóng các cổng đó.
+Trước run thật, đã chạy trên Windows: **17 test baseline đạt**, JSON notebook hợp lệ, 6 code cells phân tích cú pháp Python được và **39 test toàn repo đạt**. Đây là kiểm tra logic cục bộ; run Colab thật ở trên xác nhận notebook và dependency hoạt động trong runtime T4 được ghi lại, nhưng không bảo đảm tương thích với runtime khác. Xem [runbook](docs/COLAB_RUNBOOK.md), [thiết kế mô hình](docs/AI_DESIGN.md) và [nhật ký thí nghiệm](docs/EXPERIMENT_LOG.md). M2 vẫn chờ các cổng đánh giá riêng; baseline dev không đóng các cổng đó.
 
 ## Kiểm tra bàn giao M0 — 2026-11-14
 

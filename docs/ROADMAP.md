@@ -1,6 +1,6 @@
 # Lộ trình và điều kiện hoàn thành
 
-M0 và phần triển khai CPU/khảo sát nhỏ M1 đã thực hiện; xem [M1_REPORT](M1_REPORT.md). M2 đã có 100 mẫu được duyệt và SFT CPU 90/10, nhưng **M2 chưa hoàn tất**: rubric còn chờ phản hồi người duyệt, final holdout chưa được người độc lập duyệt/niêm phong, và bằng chứng giấy phép chi tiết chưa có trong repo (ledger hiện dựa trên xác nhận của người dùng). Xem [M2_REPORT](M2_REPORT.md). M3–M6 là dự kiến; không xác nhận GPU, số giờ hay hiệu quả fine-tune trước khi thử.
+M0, phần triển khai CPU/khảo sát nhỏ M1 và một run baseline Colab M3 đã thực hiện; xem [M1_REPORT](M1_REPORT.md), [M2_REPORT](M2_REPORT.md) và [EXPERIMENT_LOG](EXPERIMENT_LOG.md). M2 đã có 100 mẫu được duyệt và SFT CPU 90/10, nhưng **M2 chưa hoàn tất**: rubric còn chờ phản hồi người duyệt, final holdout chưa được người độc lập duyệt/niêm phong, và bằng chứng giấy phép chi tiết chưa có trong repo (ledger hiện dựa trên xác nhận của người dùng). M4–M6 vẫn là dự kiến; không xác nhận số giờ hay hiệu quả fine-tune trước khi thử.
 
 | Mốc | Đầu vào | Công việc | Artifact đầu ra | Điều kiện hoàn thành | Cách kiểm tra |
 |---|---|---|---|---|---|

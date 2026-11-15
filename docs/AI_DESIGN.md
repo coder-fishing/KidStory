@@ -2,9 +2,9 @@
 
 ## Ứng viên và trạng thái
 
-M3 khóa ứng viên **Qwen/Qwen2.5-3B-Instruct** tại revision `aa8e72537993ba99e69dfaafa59ed015b17504d1`. Model card và LICENSE được rà tại revision này; LICENSE là Qwen Research License Agreement, với phạm vi phi thương mại theo điều khoản của nhà phát hành. Dự án khai báo mục đích học tập/thi cử, nhưng repo chưa có đánh giá pháp lý độc lập. Chưa tải weights hoặc chạy trên Colab; chưa có bằng chứng model vừa GPU được cấp hay đạt yêu cầu tiếng Việt. Thông tin ngôn ngữ trong model card là tuyên bố của nhà phát hành, không phải kiểm chứng chất lượng đồ án.
+M3 khóa ứng viên **Qwen/Qwen2.5-3B-Instruct** tại revision `aa8e72537993ba99e69dfaafa59ed015b17504d1`. Model card và LICENSE được rà tại revision này; LICENSE là Qwen Research License Agreement, với phạm vi phi thương mại theo điều khoản của nhà phát hành. Dự án khai báo mục đích học tập/thi cử, nhưng repo chưa có đánh giá pháp lý độc lập. Run baseline đầu tiên đã tải model và sinh 20/20 đề dev trên Tesla T4; chi tiết trong `docs/EXPERIMENT_LOG.md`. Run này chưa chứng minh chất lượng tiếng Việt tổng quát hoặc khả năng trên GPU/runtime khác. Thông tin ngôn ngữ trong model card là tuyên bố của nhà phát hành, không phải kiểm chứng chất lượng đồ án.
 
-Notebook baseline M3 là `notebooks/m3_baseline_colab.ipynb`; module chạy là `src/kids_story/baseline.py`. Bộ cài đặt inference pin Transformers 4.57.3 và Accelerate 1.12.0 trong `requirements/m3-colab.lock.txt`. PyTorch không bị thay thế bởi notebook: phiên bản runtime Colab được ghi lại. Đây là lựa chọn dependency có phiên bản cụ thể, chưa phải xác nhận tương thích thực nghiệm trên Colab; phải kiểm tra khi chạy notebook.
+Notebook baseline M3 là `notebooks/m3_baseline_colab.ipynb`; module chạy là `src/kids_story/baseline.py`. Bộ cài đặt inference pin Transformers 4.57.3 và Accelerate 1.12.0 trong `requirements/m3-colab.lock.txt`. PyTorch không bị thay thế bởi notebook: phiên bản runtime Colab được ghi lại. Các pin này đã chạy thành công trong runtime của lần baseline đầu; tương thích trên runtime/GPU khác vẫn cần xác minh riêng.
 
 M3 dùng Transformers trực tiếp cho baseline model gốc. **Unsloth không cài hoặc dùng trong M3**; được dự kiến cho M4 QLoRA, nơi phải pin và kiểm tra lại tương thích theo GPU và runtime thực tế.
 
