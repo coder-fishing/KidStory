@@ -336,10 +336,13 @@ class ColabNotebookContractTests(unittest.TestCase):
         joined = "\n".join(headings)
         positions = [joined.index(heading) for heading in required]
         self.assertEqual(positions, sorted(positions))
-        self.assertTrue(any("torch.cuda.is_available" in source for source in sources))
-        self.assertTrue(any("run_baseline" in source for source in sources))
-        self.assertIn("Required package missing", "\n".join(sources))
-        self.assertIn("PackageNotFoundError", "\n".join(sources))
+        combined = "\n".join(sources)
+        self.assertIn("torch.cuda.is_available", combined)
+        self.assertLess(combined.index("if not runtime_info[\"cuda_available\"]"), combined.index("%pip install"))
+        self.assertLess(combined.index("%pip install"), combined.index("run_baseline("))
+        self.assertIn("Required package missing", combined)
+        self.assertIn("PackageNotFoundError", combined)
+        self.assertTrue(all(not cell.get("outputs") for cell in cells if cell["cell_type"] == "code"))
 
     def test_notebook_uses_secret_without_exposing_credentials_or_unsloth(self):
         notebook = self.notebook()
@@ -348,6 +351,8 @@ class ColabNotebookContractTests(unittest.TestCase):
         self.assertIn("GIT_ASKPASS", sources)
         self.assertNotIn("github_pat_", sources)
         self.assertNotIn("ghp_", sources)
+        self.assertNotIn("GITHUB_TOKEN@", sources)
+        self.assertNotIn("x-access-token@", sources)
         self.assertNotIn("pip install unsloth", sources.lower())
         self.assertNotIn("import unsloth", sources.lower())
         self.assertNotIn("huggingface.co/", sources.lower())

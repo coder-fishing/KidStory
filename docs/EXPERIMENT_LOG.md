@@ -2,6 +2,10 @@
 
 Chưa có run baseline hoặc QLoRA. Bảng dưới là **mẫu trống**, không phải kết quả. Sao chép cho mỗi run ở các milestone sau; giá trị chưa có để trống/null, không điền số minh họa như số thực.
 
+## Trạng thái triển khai M3 — 2026-11-15
+
+Runner CPU-testable, notebook Colab và dependency pins đã được thêm vào repo. **Chưa chạy trên Colab, chưa tải weights, chưa có generation output hay metric.** Không có run_id, GPU hoặc artifact để ghi ở bảng bên dưới. Phiên bản dependency pin hiện tại chưa được xác nhận bằng smoke test Colab. Sau lần chạy thật, ghi commit, dependency, GPU, model revision, hash prompt/input, output path, trạng thái `COMPLETE.json` và lỗi nếu có; giữ kết quả `completed_with_errors` tách khỏi baseline đầy đủ.
+
 | Trường | Giá trị |
 |---|---|
 | run_id / loại run / mục đích | |

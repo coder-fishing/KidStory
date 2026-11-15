@@ -2,7 +2,11 @@
 
 ## Ứng viên và trạng thái
 
-Ứng viên **Qwen/Qwen2.5-3B-Instruct** được đề xuất để thử mô hình instruction quy mô nhỏ trước; chưa có bằng chứng chạy vừa GPU Colab hoặc đạt yêu cầu tiếng Việt. Tra cứu sơ bộ ngày 2026-11-14: [model card chính thức](https://huggingface.co/Qwen/Qwen2.5-3B-Instruct) gắn nhãn `qwen-research`. Cần đọc toàn bộ điều khoản tại revision sẽ dùng, không coi đây là giấy phép Apache hoặc quyền thương mại mặc định. Chưa tải weights, chưa pin revision; M3 chỉ bắt đầu sau kiểm tra quyền sử dụng và môi trường.
+M3 khóa ứng viên **Qwen/Qwen2.5-3B-Instruct** tại revision `aa8e72537993ba99e69dfaafa59ed015b17504d1`. Model card và LICENSE được rà tại revision này; LICENSE là Qwen Research License Agreement, với phạm vi phi thương mại theo điều khoản của nhà phát hành. Dự án khai báo mục đích học tập/thi cử, nhưng repo chưa có đánh giá pháp lý độc lập. Chưa tải weights hoặc chạy trên Colab; chưa có bằng chứng model vừa GPU được cấp hay đạt yêu cầu tiếng Việt. Thông tin ngôn ngữ trong model card là tuyên bố của nhà phát hành, không phải kiểm chứng chất lượng đồ án.
+
+Notebook baseline M3 là `notebooks/m3_baseline_colab.ipynb`; module chạy là `src/kids_story/baseline.py`. Bộ cài đặt inference pin Transformers 4.57.3 và Accelerate 1.12.0 trong `requirements/m3-colab.lock.txt`. PyTorch không bị thay thế bởi notebook: phiên bản runtime Colab được ghi lại. Đây là lựa chọn dependency có phiên bản cụ thể, chưa phải xác nhận tương thích thực nghiệm trên Colab; phải kiểm tra khi chạy notebook.
+
+M3 dùng Transformers trực tiếp cho baseline model gốc. **Unsloth không cài hoặc dùng trong M3**; được dự kiến cho M4 QLoRA, nơi phải pin và kiểm tra lại tương thích theo GPU và runtime thực tế.
 
 ## Hợp đồng prompt và SFT dự kiến
 
@@ -35,4 +39,4 @@ Pilot đề xuất 300–500 mẫu chất lượng ở M4; chưa chốt rank, ba
 | Suy giảm an toàn hoặc từ chối quá mức | UC05/UC06, S1 riêng và người chấm |
 | VRAM không đủ | Smoke test trên GPU thực, giảm cấu hình có ghi log |
 
-Các phép kiểm chứng trên chưa chạy ở M0.
+Các giả thuyết chất lượng/safety trong bảng chưa được kiểm chứng bằng run model ở M3; test cấu trúc runner không thay thế các đánh giá này.

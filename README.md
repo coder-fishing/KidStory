@@ -6,7 +6,7 @@
 
 ## Hiện trạng M2 — có SFT CPU, còn cổng đánh giá chờ duyệt
 
-Đã có pipeline M1 và công cụ M2 CPU. Batch 100 mẫu được duyệt đã xuất SFT tại `outputs/m2_reviewed_sft_100_v1/` (90 train/10 validation, seed 42); chưa train model. **M2 chưa hoàn tất** vì phiếu rubric còn pending, final holdout chưa được người độc lập duyệt/niêm phong và tài liệu quyền nguồn chưa được kiểm chứng độc lập trong repo. 20 đề dev và 50 golden draft vẫn là draft/pending; chưa có notebook, baseline, human scores hoặc `golden_test_v1` được duyệt. Xem [báo cáo M2](docs/M2_REPORT.md) và lịch sử [M1](docs/M1_REPORT.md).
+Đã có pipeline M1 và công cụ M2 CPU. Batch 100 mẫu được duyệt đã xuất SFT tại `outputs/m2_reviewed_sft_100_v1/` (90 train/10 validation, seed 42); chưa train model. **M2 chưa hoàn tất** vì phiếu rubric còn pending, final holdout chưa được người độc lập duyệt/niêm phong và tài liệu quyền nguồn chưa được kiểm chứng độc lập trong repo. 20 đề dev và 50 golden draft vẫn là draft/pending; chưa có human scores hoặc `golden_test_v1` được duyệt. M3 đã có runner và notebook nhưng chưa chạy baseline trên Colab. Xem [báo cáo M2](docs/M2_REPORT.md) và lịch sử [M1](docs/M1_REPORT.md).
 
 **Bạn đọc tiếp:** [báo cáo M2](docs/M2_REPORT.md). Batch chỉnh sửa 30 mẫu mới có 24 approved và 6 pending tại `outputs/m2_user_approved_import_01/`; batch SFT 100 mẫu là artifact riêng. Ledger ghi quyền sử dụng `confirmed` theo xác nhận của người phụ trách; tài liệu và phạm vi cấp phép chưa được kiểm chứng độc lập trong repo ([rà nguồn](docs/SOURCE_AUDIT.md)).
 
@@ -31,7 +31,7 @@ data/raw/              snapshot khảo sát HF (bị Git ignore)
 outputs/               kết quả chạy và báo cáo (bị Git ignore)
 ```
 
-Đã triển khai phần dữ liệu và xuất hội thoại SFT có điều kiện trong `src/kids_story/data/`. Train, inference, chạy/chấm output mô hình và `app/` Gradio **chưa triển khai**. Notebook Colab sau này chỉ thiết lập và gọi module. Không có module rỗng mô phỏng tiến độ.
+Đã triển khai phần dữ liệu và xuất hội thoại SFT có điều kiện trong `src/kids_story/data/`. Fine-tune/QLoRA, chấm output mô hình và `app/` Gradio **chưa triển khai**. M3 có module baseline Transformers và notebook Colab mỏng; chưa chạy model thật hoặc tải weights. Không có module rỗng mô phỏng tiến độ.
 
 ## Chạy M1 trên CPU
 
@@ -88,6 +88,21 @@ python -m kids_story.data.m2 sft --input outputs/m2_batch_approved_import_v3/rev
 Kết quả: 0 cặp gần trùng ứng viên; SFT có 90 train/10 validation. Kiểm tra bổ sung xác nhận schema 100 dòng, không giao source ID/nhóm giữa hai split và hash manifest hợp lệ. Đây là artifact nhỏ để bàn giao M2, chưa đủ 300–500 mẫu cho pilot M4.
 
 Không dùng golden draft để chỉnh prompt. Người duyệt cần đọc [REVIEW_GUIDE](data/evaluation/REVIEW_GUIDE.md) trước khi mở tập test.
+
+## M3 baseline Colab — triển khai, chưa chạy model thật
+
+Runner nằm ở `src/kids_story/baseline.py`; notebook là [notebooks/m3_baseline_colab.ipynb](notebooks/m3_baseline_colab.ipynb). Notebook dùng model `Qwen/Qwen2.5-3B-Instruct` tại revision cố định, dùng `data/evaluation/dev_cases.jsonl` cùng `prompts/story_system_v1.txt`, yêu cầu GPU CUDA và giữ PyTorch do Colab cung cấp. Repo private được clone qua Colab Secret `GITHUB_TOKEN`; token không nằm trong URL/cell output. Outputs mặc định ghi vào Google Drive và được kiểm tra hash. M3 không dùng Unsloth; Unsloth dự kiến cho M4 QLoRA.
+
+Các lệnh kiểm tra cục bộ đã chạy trong PowerShell (không tải model, không dùng GPU):
+
+```powershell
+$env:PYTHONPATH = (Resolve-Path src).Path
+python -m unittest discover -s tests -p test_baseline.py -v
+python -m json.tool notebooks/m3_baseline_colab.ipynb
+python -m unittest discover -s tests -v
+```
+
+Kết quả lần chạy ngày 2026-11-15: **17 test baseline đạt**, JSON notebook hợp lệ, 6 code cells phân tích cú pháp Python được và **39 test toàn repo đạt**. Đây chỉ là kiểm tra logic/JSON trên máy Windows; **không phải** xác nhận dependency cài được trên Colab hay model chạy thành công. Dependency pins tại `requirements/m3-colab.lock.txt` chưa được smoke test trên Colab. Xem [runbook](docs/COLAB_RUNBOOK.md), [thiết kế mô hình](docs/AI_DESIGN.md) và [nhật ký thí nghiệm](docs/EXPERIMENT_LOG.md). M2 vẫn chờ các cổng đánh giá riêng; baseline dev không đóng các cổng đó.
 
 ## Kiểm tra bàn giao M0 — 2026-11-14
 

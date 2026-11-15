@@ -156,7 +156,7 @@ Commit trailer: `Plan: docs/superpowers/plans/2026-11-15-m3-colab-baseline.md` a
 - Consumes: the Python baseline runner from Task 2 and the user's Colab account/runtime.
 - Produces: a notebook that either stops with a clear environment/authentication message or completes the configured baseline run without exposing secrets.
 
-- [ ] **Step 1: Write failing notebook/lock validation cases**
+- [x] **Step 1: Write failing notebook/lock validation cases**
 
 Test cases:
 
@@ -167,11 +167,11 @@ Test cases:
 - Unsloth appears only in the documented M4 scope and is not installed/imported for M3
 - pinned model ID/revision, prompt paths and output path configuration -> match the approved spec
 
-- [ ] **Step 2: Run focused tests and confirm notebook cases fail**
+- [x] **Step 2: Run focused tests and confirm notebook cases fail**
 
 Run `python -m unittest discover -s tests -p test_baseline.py -v`.
 
-- [ ] **Step 3: Create the thin Colab workflow and locked environment**
+- [x] **Step 3: Create the thin Colab workflow and locked environment**
 
 The notebook proceeds in this order: authenticate to the private repository without printing credentials; record the source commit; check Python, existing PyTorch, CUDA, GPU type and available VRAM; stop if no GPU is available; install only the locked M3 inference dependencies; verify package versions; mount Drive through the Colab interface when durable storage is selected; configure a new output directory; call the Python runner; verify output hashes.
 
@@ -179,7 +179,7 @@ Keep Colab-provided PyTorch unless an incompatibility is demonstrated and the re
 
 Update the runbook, AI design and experiment log to distinguish implemented notebook behaviour from a model run not yet executed. README commands must be added only after those commands have actually run in the corresponding environment.
 
-- [ ] **Step 4: Validate notebook structure, tests and documentation claims**
+- [x] **Step 4: Validate notebook structure, tests and documentation claims**
 
 Run `python -m json.tool notebooks/m3_baseline_colab.ipynb` and `python -m unittest discover -s tests -v` locally. Confirm that the notebook's runtime checks do not claim a real Colab GPU run and that no secret, weight or output artifact is tracked by Git.
 
