@@ -15,18 +15,20 @@ M2 vẫn còn các xác nhận của người chấm và người độc lập. 
 ## Phạm vi
 
 - Thêm module Python để tải tokenizer/mô hình tại revision cố định, dựng messages, sinh văn bản và lưu run artifact.
-- Thêm notebook Colab mỏng để kiểm tra runtime, lấy mã nguồn tại commit xác định, cài dependencies đã khóa, cấu hình đường dẫn và gọi module.
+- Thêm notebook Colab mỏng cho M3 để kiểm tra runtime, lấy mã nguồn tại commit xác định, cài dependencies đã khóa, cấu hình đường dẫn và gọi module.
 - Chỉ dùng `data/evaluation/dev_cases.jsonl`. Input của mô hình là trường `prompt` đã được tạo sẵn và system prompt `prompts/story_system_v1.txt`.
 - Ghi output thô, cấu hình hiệu lực, môi trường, thời gian, mã nguồn và checksum vào thư mục mới trong `outputs/`.
 - Kiểm thử logic không cần tải weights bằng fixture tổng hợp.
 
 ## Ngoài phạm vi
 
-Không fine-tune/QLoRA, chọn checkpoint, chấm điểm, thay prompt, chỉnh rubric, mở hoặc dùng golden draft, xây ứng dụng Gradio, gọi API trả phí, tải model vào repo hay chạy model trên máy Windows hiện tại. Không khẳng định môi trường Colab/GPU đã được kiểm tra nếu notebook chưa thực sự chạy.
+Không fine-tune/QLoRA trong M3, chọn checkpoint, chấm điểm, thay prompt, chỉnh rubric, mở hoặc dùng golden draft, xây ứng dụng Gradio, gọi API trả phí, tải model vào repo hay chạy model trên máy Windows hiện tại. Unsloth được dành cho M4 để thử QLoRA; không cài hoặc dùng nó trong baseline M3. Không khẳng định môi trường Colab/GPU đã được kiểm tra nếu notebook chưa thực sự chạy.
 
 ## Quyết định thiết kế
 
 Model là `Qwen/Qwen2.5-3B-Instruct`, revision bất biến `aa8e72537993ba99e69dfaafa59ed015b17504d1`. Model card tại revision cho biết model có 3.09 tỷ tham số và liệt kê tiếng Việt trong hỗ trợ đa ngôn ngữ. Đây là thông tin nhà phát hành, không phải kiểm chứng chất lượng tiếng Việt của đồ án. LICENSE tại revision là Qwen RESEARCH LICENSE AGREEMENT: định nghĩa phi thương mại là nghiên cứu/đánh giá và chỉ cấp quyền cho mục đích phi thương mại. Dự án đã khai báo là học tập/thi cử phi thương mại; không phân phối weights hoặc model như một dịch vụ trong M3. Người dùng cần tuân thủ toàn bộ điều khoản khi sử dụng hay phân phối artifact. Nguồn: [model card](https://huggingface.co/Qwen/Qwen2.5-3B-Instruct/tree/aa8e72537993ba99e69dfaafa59ed015b17504d1), [LICENSE tại revision](https://huggingface.co/Qwen/Qwen2.5-3B-Instruct/blob/aa8e72537993ba99e69dfaafa59ed015b17504d1/LICENSE).
+
+M3 dùng Transformers trực tiếp để baseline phản ánh đường chạy model gốc, không trộn tối ưu hóa loader/training. Unsloth được dự kiến dùng ở M4 cho QLoRA trên Colab; khi tới M4 phải kiểm tra model/GPU support và pin bộ phiên bản tương thích theo runtime thực tế. Unsloth có hướng dẫn cài đặt Colab và fine-tune; điều đó không thay cho smoke test của đồ án: [Colab](https://unsloth.ai/docs/get-started/install/google-colab), [yêu cầu hệ thống](https://unsloth.ai/docs/get-started/fine-tuning-for-beginners/unsloth-requirements).
 
 Ba cách triển khai đã cân nhắc:
 
@@ -48,7 +50,7 @@ Ba cách triển khai đã cân nhắc:
 
 Giá trị ban đầu theo `docs/AI_DESIGN.md`: seed 42, lấy mẫu (`do_sample=true`), temperature 0.7, `top_p=0.9`, `repetition_penalty=1.0`, `max_new_tokens=512`. Đây là cấu hình khảo sát, chưa được hiệu chuẩn; lưu cả giá trị hiệu lực và cảnh báo rằng giới hạn 512 token có thể kết thúc trước 150–250 đơn vị cách trắng. Không tự đổi tham số giữa các đề trong một run.
 
-Notebook yêu cầu GPU được cấp trong runtime Colab và ghi lại loại GPU/VRAM thực tế. Nếu thiếu GPU, notebook dừng ở kiểm tra môi trường, không tự chuyển sang CPU hoặc tuyên bố đã có baseline. Dependencies phải được pin theo một bộ tương thích được ghi trong artifact; việc cài đặt chỉ diễn ra khi người dùng chạy notebook. Không yêu cầu token Hugging Face cho model public. Nếu lấy code từ repo private, notebook dùng cơ chế Colab Secret được cấu hình bởi người dùng; không nhúng token vào notebook, output hoặc URL.
+Notebook yêu cầu GPU được cấp trong runtime Colab và ghi lại loại GPU/VRAM thực tế. Nếu thiếu GPU, notebook dừng ở kiểm tra môi trường, không tự chuyển sang CPU hoặc tuyên bố đã có baseline. Dependencies M3 (PyTorch runtime do Colab cung cấp cùng Transformers/Accelerate cần thiết) phải được pin hoặc ghi chính xác theo phiên bản runtime trong artifact; việc cài đặt chỉ diễn ra khi người dùng chạy notebook. Không cài Unsloth trong M3. Ở M4, pin và smoke test riêng bộ Unsloth/TRL/PEFT/quantization theo GPU được cấp. Không yêu cầu token Hugging Face cho model public. Nếu lấy code từ repo private, notebook dùng cơ chế Colab Secret được cấu hình bởi người dùng; không nhúng token vào notebook, output hoặc URL.
 
 ## Hợp đồng artifact
 
