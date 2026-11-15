@@ -9,5 +9,6 @@
 {"source_id": "TYPE", "source_group_id": "G", "text": 42}
 {"source_id": "MISSING", "source_group_id": "H"}
 {"source_id": "NO_GROUP", "text": "Một dòng thiếu nhóm nguồn."}
+
 {broken json
 ["not", "an", "object"]

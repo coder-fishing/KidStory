@@ -35,7 +35,7 @@ outputs/               kết quả chạy và báo cáo (bị Git ignore)
 
 ## Chạy M1 trên CPU
 
-Môi trường đã chạy: Windows PowerShell, Python 3.12.10, không cài dependencies, không GPU. Workspace hiện có `.git`; một số commit chỉ ghi kế hoạch review, nhiều file dự án vẫn chưa được Git theo dõi. Không push hoặc tạo repo từ xa. [Nhiệm vụ M1 gốc](prompts/codex_next_task.md) được giữ để truy vết.
+Môi trường đã chạy: Windows PowerShell, Python 3.12.10, không cài dependencies, không GPU. Mã nguồn và tài liệu hiện được theo dõi trên Git; commit `ed7860c` đã push lên `origin/main` của repository riêng. Dữ liệu chạy trong `data/raw/` và `outputs/` vẫn bị Git ignore. [Nhiệm vụ M1 gốc](prompts/codex_next_task.md) được giữ để truy vết.
 
 Các lệnh dưới đây **đã chạy thành công** từ thư mục dự án:
 
