@@ -61,17 +61,26 @@
 
 **Files:** đầu vào review v3 hiện có; output mới `outputs/m2_ai_review_import_01/`; phiếu mới `outputs/m2_ai_revised_30/`.
 
-- [ ] Nhập bản CSV đề xuất bằng baseline v3 và lưu vào thư mục output mới, không ghi đè artifact cũ.
-- [ ] Xác nhận importer giữ `original_text`, ghi lịch sử trước/sau, tính lại `exact_hash` và flags cho text đã sửa.
-- [ ] Chạy sàng lọc near lại trên các bản ghi đã nhập vào thư mục `outputs/m2_ai_near_01/`, không dùng near report cũ sau khi text thay đổi.
-- [ ] Xuất phiếu review mới từ records đã nhập; người dùng phải đọc lại mọi text/nhãn và tự xác nhận trạng thái cuối.
-- [ ] Kiểm tra 30 mẫu vẫn pending, không có human approval hoặc reviewer giả, và provenance không đổi.
+- [x] Nhập bản CSV đề xuất bằng baseline v3 và lưu vào thư mục output mới, không ghi đè artifact cũ.
+- [x] Xác nhận importer giữ `original_text`, ghi lịch sử trước/sau, tính lại `exact_hash` và flags cho text đã sửa.
+- [x] Chạy sàng lọc near lại trên các bản ghi đã nhập vào thư mục `outputs/m2_ai_near_01/`, không dùng near report cũ sau khi text thay đổi.
+- [x] Xuất phiếu review mới từ records đã nhập; người dùng phải đọc lại mọi text/nhãn và tự xác nhận trạng thái cuối.
+- [x] Kiểm tra 30 mẫu vẫn pending, không có human approval hoặc reviewer giả, và provenance không đổi.
 
 **Cases:**
 
 - Khi một text đã sửa bị cờ mới, phiếu mới giữ cờ đó và không đánh dấu đã xử lý.
 - Khi source ID, revision, hash hoặc cột chỉ đọc không khớp baseline, quy trình dừng và giữ nguyên artifact cũ.
 - Khi có cặp gần trùng sau chỉnh sửa, cặp được xuất thành ứng viên pending, không tự gộp.
+
+**Kết quả thực tế:**
+
+- `python -m kids_story.data.m2 import-review --input outputs/m2_survey30_names_tool_v3/records.jsonl --csv outputs/m2_survey30_names_tool_v3/review/metadata_review.filled.csv --baseline outputs/m2_survey30_names_tool_v3/review/review_baseline.json --output-dir outputs/m2_ai_review_import_01` → 30 dòng nhập, 0 approved.
+- `python -m kids_story.data.m2 near --input outputs/m2_ai_review_import_01/reviewed_records.jsonl --output-dir outputs/m2_ai_near_01 --threshold 0.65 --ngram 3` → 0 cặp, 0 nhóm ứng viên. Đây chỉ là kết quả sàng lọc của 30 mẫu này, không phải chứng nhận không có gần trùng.
+- `python -m kids_story.data.m2 export-review --input outputs/m2_ai_review_import_01/reviewed_records.jsonl --output-dir outputs/m2_ai_revised_30/review` → xuất 30 dòng.
+- Kiểm tra Python: 30 ID duy nhất; 30/30 còn pending; 0 xác nhận người duyệt; lịch sử sửa có ở 30/30; source ID/revision/source text/original text giữ nguyên; hash bảng gốc và manifest mới khớp.
+- Cờ sau tái xử lý: không còn cờ cấu trúc ở 30 dòng; `flags_resolved` vẫn false để người duyệt tự rà nội dung.
+- Không chạy bộ test; chỉ chạy ba lệnh CLI của quy trình dữ liệu và kiểm tra nhất quán artifact ở trên.
 
 ## Verification
 
