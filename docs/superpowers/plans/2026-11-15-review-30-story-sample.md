@@ -41,12 +41,12 @@
 
 **Files:** bản sao `metadata_review.filled.csv`; không sửa bảng gốc.
 
-- [ ] Sửa lỗi dịch/ngữ pháp đã ghi nhận ở từng dòng, gồm sai nghĩa, nhầm nhân vật/loài vật, đại từ, dấu câu và cách gọi vật dụng.
-- [ ] Viết lại các tình tiết có nguy cơ cho trẻ ở các dòng 6, 14, 20, 28, 29 và 30 theo hướng an toàn, giữ mục đích truyện khi có thể; nếu không thể giữ nghĩa nguồn mà không bịa thêm tình tiết, ghi đề xuất là cần người dùng quyết định.
-- [ ] Giữ nhất quán cách Việt hóa tên theo mapping đã xác nhận; kiểm tra từng lần xuất hiện trong `processed_text`, `characters` và `character_name_notes`.
-- [ ] Điền `topic`, `characters`, `lesson` như nhãn đề xuất; `label_source` ghi nguồn AI đang chờ người dùng rà. Nếu không có bài học được nội dung hỗ trợ, ghi rõ chưa đề xuất thay vì tự tạo bài học.
-- [ ] Ghi `review_notes` cho từng dòng nêu sửa đổi và vấn đề còn cần người dùng xác nhận; mọi trường duyệt của con người vẫn giữ pending/false/trống.
-- [ ] Kiểm tra bảng làm việc có đủ 30 source ID duy nhất, đúng header, đúng thứ tự cột và không đổi cột chỉ đọc.
+- [x] Sửa lỗi dịch/ngữ pháp đã ghi nhận ở từng dòng, gồm sai nghĩa, nhầm nhân vật/loài vật, đại từ, dấu câu và cách gọi vật dụng.
+- [x] Viết lại các tình tiết có nguy cơ cho trẻ ở các dòng 6, 14, 20, 28, 29 và 30 theo hướng an toàn, giữ mục đích truyện khi có thể; nếu không thể giữ nghĩa nguồn mà không bịa thêm tình tiết, ghi đề xuất là cần người dùng quyết định.
+- [x] Giữ nhất quán cách Việt hóa tên theo mapping đã xác nhận; kiểm tra từng lần xuất hiện trong `processed_text`, `characters` và `character_name_notes`.
+- [x] Điền `topic`, `characters`, `lesson` như nhãn đề xuất; `label_source` ghi nguồn AI đang chờ người dùng rà. Nếu không có bài học được nội dung hỗ trợ, ghi rõ chưa đề xuất thay vì tự tạo bài học.
+- [x] Ghi `review_notes` cho từng dòng nêu sửa đổi và vấn đề còn cần người dùng xác nhận; mọi trường duyệt của con người vẫn giữ pending/false/trống.
+- [x] Kiểm tra bảng làm việc có đủ 30 source ID duy nhất, đúng header, đúng thứ tự cột và không đổi cột chỉ đọc.
 
 **Cases:**
 
@@ -54,6 +54,8 @@
 - Khi bản nguồn có mâu thuẫn hoặc kết thúc không phù hợp, bản mới ghi rõ phương án đề xuất và không giả vờ là bản dịch nguyên văn.
 - Khi mapping tên chưa có quyết định trong lịch sử, tên được giữ nguyên và ghi chờ duyệt.
 - Khi sửa text, mọi xác nhận duyệt vẫn false và trạng thái vẫn pending.
+
+**Kết quả:** Tạo `metadata_review.filled.csv` với 30 ID duy nhất; cả 30 text được chỉnh; cột nguồn/provenance giữ nguyên; trạng thái pending và mọi xác nhận false.
 
 ### Task 2 — Nhập có lịch sử và xuất phiếu review mới
 
