@@ -52,7 +52,7 @@
 - Consumes: the spec's development JSONL, system prompt and baseline configuration.
 - Produces: validated cases, model messages that exclude evaluator-only data, and per-case result records for the generation task.
 
-- [ ] **Step 1: Write failing logic tests**
+- [x] **Step 1: Write failing logic tests**
 
 Test cases:
 
@@ -61,11 +61,11 @@ Test cases:
 - missing, non-text or blank `prompt` -> rejected before any model load
 - valid row containing `expected_behavior`, rubric and constraints -> model messages include only the fixed system text and `prompt`
 
-- [ ] **Step 2: Run the focused tests and confirm the new cases fail**
+- [x] **Step 2: Run the focused tests and confirm the new cases fail**
 
 Run from PowerShell with `PYTHONPATH` set to `src`: `python -m unittest discover -s tests -p test_baseline.py -v`.
 
-- [ ] **Step 3: Build input and message preparation behaviour**
+- [x] **Step 3: Build input and message preparation behaviour**
 
 Unit: `validate_dev_cases` in `src/kids_story/baseline.py`.
 - Takes: the development JSONL path.
@@ -77,12 +77,12 @@ Unit: `build_messages` in `src/kids_story/baseline.py`.
 - Returns: system and user messages in that order.
 - Rules: use the prompt verbatim; do not add evaluator-only fields or inferred plot details.
 
-- [ ] **Step 4: Run focused and regression tests**
+- [x] **Step 4: Run focused and regression tests**
 
 Run `python -m unittest discover -s tests -p test_baseline.py -v` and `python -m unittest discover -s tests -v`.
 Expected: baseline logic tests and all existing M1/M2 tests pass.
 
-- [ ] **Step 5: Commit Task 1**
+- [x] **Step 5: Commit Task 1**
 
 Commit subject: `[2026-11-15-m3-colab-baseline] Add baseline input and message validation`
 
