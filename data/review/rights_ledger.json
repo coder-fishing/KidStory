@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "sources": [
+    {
+      "dataset_id": "nampdn-ai/tinystories-vietnamese",
+      "revision": "eb37a7aa8cc44ad9841175163a460fed5c2c1b24",
+      "training_use": "confirmed",
+      "declared_project_scope": {
+        "purpose": "academic study and examination project",
+        "commercial_use": false,
+        "source": "user statement in conversation",
+        "recorded_at": "2026-11-15T00:59:00+07:00"
+      },
+      "reviewer": "self-review (project author)",
+      "reviewed_at": "2026-11-15T08:16:11+07:00",
+      "evidence": [
+        {
+          "type": "upstream_dataset",
+          "reference": "roneneldan/TinyStories (Hugging Face)",
+          "note": "Original English dataset licensed under CDLA-Sharing-1.0"
+        },
+        {
+          "type": "derivative_repository",
+          "reference": "https://huggingface.co/datasets/nampdn-ai/tinystories-vietnamese/tree/eb37a7aa8cc44ad9841175163a460fed5c2c1b24",
+          "note": "Listed with MIT license tag on repository card; translation pipeline and upstream attribution require manual verification."
+        },
+        {
+          "type": "scope_declaration",
+          "reference": "docs/SOURCE_AUDIT.md",
+          "note": "Restricted strictly to non-commercial academic study and examination evaluation."
+        },
+        {
+          "type": "user_attestation",
+          "reference": "User statement in conversation, 2026-11-15",
+          "note": "The project author states that permission has been obtained and explicitly confirms training_use=confirmed. No permission document, grantor identity, or detailed scope was provided in the repository; this attestation has not been independently verified."
+        }
+      ],
+      "review_notes": "Per the project author's explicit instruction and statement that permission has been obtained, training_use is recorded as confirmed for the declared academic, non-commercial project. The permission document, grantor identity, and detailed scope were not provided in the repository and have not been independently verified. The MIT label alone does not establish the translation's rights chain. Translation method and upstream mapping remain unverified. See docs/SOURCE_AUDIT.md."
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+Viết một truyện ngắn tiếng Việt cho trẻ 6–8 tuổi.
+Chủ đề: {topic}
+Nhân vật: {characters}
+Bài học muốn truyền tải: {lesson}
+Độ dài: {length}
+
+Quy ước: nếu không chọn độ dài, dùng khoảng 150–250 đơn vị cách trắng (không phải số từ sau phân đoạn tiếng Việt). Ràng buộc độ dài cụ thể được ưu tiên hơn mặc định.

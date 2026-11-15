@@ -1,0 +1,13 @@
+{"source_id": "A01", "source_group_id": "A", "text": "  Bé An\tchăm cây.  ", "fixture_synthetic": true}
+{"source_id": "A02", "source_group_id": "B", "text": "Bé An chăm cây.", "fixture_synthetic": true}
+{"source_id": "A03", "source_group_id": "A", "text": "Bà đặt quyển sổ lên bàn.", "fixture_synthetic": true}
+{"source_id": "A04", "source_group_id": "B", "text": "Ông mở cửa và mỉm cười.", "fixture_synthetic": true}
+{"source_id": "C01", "source_group_id": "C", "text": "Bạn nhỏ đi đến góc sân rồi", "fixture_synthetic": true}
+{"source_id": "D01", "source_group_id": "D", "text": "Mây bay qua.\nMây bay qua.", "fixture_synthetic": true}
+{"source_id": "E01", "source_group_id": "E", "text": "Chim​ hót trên cành.", "fixture_synthetic": true}
+{"source_id": "EMPTY", "source_group_id": "F", "text": " \t\r\n "}
+{"source_id": "TYPE", "source_group_id": "G", "text": 42}
+{"source_id": "MISSING", "source_group_id": "H"}
+{"source_id": "NO_GROUP", "text": "Một dòng thiếu nhóm nguồn."}
+{broken json
+["not", "an", "object"]

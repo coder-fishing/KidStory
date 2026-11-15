@@ -1,0 +1,15 @@
+# Lộ trình và điều kiện hoàn thành
+
+M0 và phần triển khai CPU/khảo sát nhỏ M1 đã thực hiện; xem [M1_REPORT](M1_REPORT.md). M2 đã có 100 mẫu được duyệt và SFT CPU 90/10, nhưng **M2 chưa hoàn tất**: rubric còn chờ phản hồi người duyệt, final holdout chưa được người độc lập duyệt/niêm phong, và bằng chứng giấy phép chi tiết chưa có trong repo (ledger hiện dựa trên xác nhận của người dùng). Xem [M2_REPORT](M2_REPORT.md). M3–M6 là dự kiến; không xác nhận GPU, số giờ hay hiệu quả fine-tune trước khi thử.
+
+| Mốc | Đầu vào | Công việc | Artifact đầu ra | Điều kiện hoàn thành | Cách kiểm tra |
+|---|---|---|---|---|---|
+| M0 Khởi tạo | Yêu cầu đồ án | Thiết kế, prompt, đề dev/test draft | Bộ 19 file theo README | Đủ file; 20 dev + 50 test đúng cơ cấu, pending | UTF-8/JSON/schema/ID/tham chiếu, rà mâu thuẫn và trùng; người duyệt chất lượng còn thiếu |
+| M1 Dữ liệu CPU | AGENTS/docs, fixture rõ nguồn tổng hợp | Tách source sampling; xác minh schema khi lấy nguồn; chuẩn hóa, cờ, exact dedup, nhóm nguồn, split | Module CPU, fixture, tests, manifest, báo cáo chất lượng nhỏ | Tái lập split; không rò nhóm; giữ original/provenance; chưa tuyên bố xử lý gần trùng | Chạy offline trên fixture, Unicode/rỗng/kiểu sai/trùng/nhóm nguồn/seed; README có lệnh thực chạy |
+| M2 Metadata và đánh giá | Pipeline M1, mẫu nguồn hợp lệ | EDA/người đọc, nhãn và text được duyệt, phương pháp gần trùng; xuất SFT; review đề/rubric | SFT train/validation + manifest, dev chốt, final holdout đã duyệt/niêm phong | Không thiếu nhãn bắt buộc đã duyệt; ngăn leakage; protocol chấm chốt | Audit provenance/labels, tokenization thử, review golden và cách ly |
+| M3 Baseline Colab | M2, quyền dùng model, GPU thực | Khóa dependencies, smoke test, sinh base trên dev | Outputs gốc, config, run log | Baseline tái lập ở mức đã công bố, prompt/config chốt trên dev | Nạp model, sinh mẫu, kiểm tra stop/token budget và lỗi |
+| M4 Pilot QLoRA | Baseline, khoảng 300–500 mẫu chất lượng được duyệt | Smoke test mask; train pilot; chọn checkpoint theo validation; so dev | Adapter, checkpoint resume nếu có, tokenizer, log, đánh giá pilot | Artifact nạp được; không dùng final chọn; báo cả kết quả âm | Token-label audit, loss finite, reload inference, so cặp dev |
+| M5 Mở rộng và final | Kết quả pilot, tài nguyên thực, holdout sạch | Mở rộng nếu hợp lý; đóng băng hệ thống; đánh giá cặp final | Manifest/config đóng băng, bảng chấm ẩn danh, báo cáo bất định | Protocol tuân thủ; không thay cấu hình theo final; đủ truy vết | Audit holdout, review người chấm, phân tích lỗi/an toàn/từ chối |
+| M6 Demo và báo cáo | Artifact được chọn, kết quả M5 | Gradio cho đầu vào v1, hướng dẫn, báo cáo giới hạn | Demo, hướng dẫn chạy, báo cáo đồ án | Luồng v1 hoạt động, người lớn biết cần rà soát truyện | Smoke/UI test input hợp lệ/rỗng/lỗi, kiểm tra nạp adapter và hiển thị |
+
+Không yêu cầu phải mở rộng nếu pilot không cải thiện hoặc tài nguyên không phù hợp. Quyết định dừng/đổi hướng ghi trong EXPERIMENT_LOG; sửa giả thuyết trên dev, không hợp thức hóa bằng final.

@@ -1,0 +1,36 @@
+# Python / notebooks / local configuration
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+.pytest_cache/
+.env
+.env.*
+!.env.example
+*credentials*.json
+*service-account*.json
+
+# Large / private runtime artifacts; evaluation drafts remain tracked
+data/raw/
+data/interim/
+data/processed/
+data/sft/
+data/manifests/private/
+models/
+weights/
+checkpoints/
+adapters/
+outputs/
+runs/
+logs/
+.cache/
+wandb/
+*.safetensors
+*.pt
+*.pth
+*.ckpt
+*.bin
+*.gguf
+*.parquet
+*.arrow
