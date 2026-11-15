@@ -105,7 +105,7 @@ python -m kids_story.data.m2 eda --input data/raw/hf_random_blocks10k/sample.jso
 
 EDA chỉ phân tích snapshot đã lấy và không sửa truyện. Tạo `eda_report.json`, `eda_manifest.json`, `name_candidates.csv`, `translation_candidates.csv` và `COMPLETE.json`. CSV gợi ý dùng UTF-8 BOM, mọi dòng có `review_status=pending`; heuristic tên/dịch sát không xác nhận nội dung. Khi đổi input hoặc revision, tạo thư mục output mới; CLI từ chối ghi đè. Có thể kiểm tra logic offline bằng fixture tổng hợp `tests/fixtures/eda_stories.jsonl`, không phải dữ liệu huấn luyện.
 
-Muốn chạy toàn bộ luồng trên Colab, mở [notebook M2 EDA](notebooks/m2_eda_colab.ipynb). Notebook clone `main`, dùng CPU và lưu snapshot/report vào Google Drive; commit cần chạy phải được push lên GitHub trước khi clone. Mỗi run có `run.log`, `run_config.json`, `COMPLETE.json` và ba ảnh PNG về độ dài, thống kê dữ liệu, tần suất ứng viên. Notebook chưa được thực thi trên runtime Colab thật.
+Muốn chạy toàn bộ luồng trên Colab, mở [notebook M2 EDA](notebooks/m2_eda_colab.ipynb). EDA dùng CPU; bước AI gợi ý mapping tên là tùy chọn, cần bật `ENABLE_AI_NAME_PROPOSALS=True` và chọn GPU. Bước AI dùng Qwen2.5-3B-Instruct tại revision M3 đã khóa, chỉ tạo `ai_name_mapping_candidates.csv` pending, không sửa truyện. Notebook clone `main`, lưu snapshot/report vào Google Drive; commit cần chạy phải được push lên GitHub trước khi clone. Mỗi run có `run.log`, `run_config.json`, `COMPLETE.json` và ba ảnh PNG về độ dài, thống kê dữ liệu, tần suất ứng viên. Notebook chưa được thực thi trên runtime Colab thật.
 
 Kiểm tra offline đã chạy trong lần cập nhật này:
 
@@ -115,7 +115,7 @@ python -m unittest discover -s tests -v
 python -m kids_story.data.m2 eda --input tests/fixtures/eda_stories.jsonl --output-dir outputs/m2_eda_fixture_smoke_final
 ```
 
-Kết quả: **46 tests đạt**; lệnh CLI fixture đọc 4 dòng tổng hợp và xuất 3 dòng ứng viên tên cùng 3 dòng ứng viên dịch sát. Không lấy dữ liệu nguồn thật, không tạo SFT và không chạy GPU trong lần kiểm tra này.
+Kết quả: **47 tests đạt**; lệnh CLI fixture đọc 4 dòng tổng hợp và xuất 3 dòng ứng viên tên cùng 3 dòng ứng viên dịch sát. Không lấy dữ liệu nguồn thật, không tạo SFT và không chạy GPU trong lần kiểm tra này.
 
 ## M3 baseline Colab — đã chạy baseline model gốc
 

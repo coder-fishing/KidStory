@@ -14,6 +14,8 @@ from kids_story.data.io import digest, read_jsonl, write_jsonl
 from kids_story.data.eda import run_eda
 from kids_story.data.m2 import prepare
 from kids_story.data.names import suggest_names
+from kids_story.data.name_ai import (build_name_messages, collect_unknown_names,
+    parse_name_suggestions)
 from kids_story.data.near import PAIR_COLUMNS, confirmed_edges, export_pairs, screen
 from kids_story.data.process import process_rows
 from kids_story.data.review import (EDITABLE, READONLY, export_review, import_review,
@@ -299,7 +301,27 @@ class M2Tests(unittest.TestCase):
         self.assertIn("run.log", combined)
         self.assertIn("run_config.json", combined)
         self.assertIn("COMPLETE.json", combined)
+        self.assertIn("ENABLE_AI_NAME_PROPOSALS", combined)
+        self.assertIn("ai_name_mapping_candidates.csv", combined)
+        self.assertIn("skipped_no_gpu", combined)
         self.assertNotIn("HF_TOKEN", combined)
+
+    def test_ai_name_proposals_group_unknowns_and_remain_pending(self):
+        candidates = collect_unknown_names([
+            {"source_id": "A", "source_name_en": "Oliver", "source_text_en": "Oliver met a fox.", "source_text_vi": "Oliver gặp cáo."},
+            {"source_id": "B", "source_name_en": "OLIVER", "source_text_en": "The boy Oliver smiled.", "source_text_vi": "Cậu bé Oliver mỉm cười."},
+            {"source_id": "C", "source_name_en": "Sue", "source_text_en": "Sue came home.", "source_text_vi": "Xuân về nhà."},
+        ])
+        self.assertEqual(len(candidates), 1)
+        self.assertEqual(candidates[0]["frequency"], 2)
+        self.assertEqual(candidates[0]["aliases"], ["OLIVER", "Oliver"])
+        self.assertEqual(len(build_name_messages(candidates)), 2)
+        result = parse_name_suggestions('[{"english_name":"Oliver","proposed_vietnamese_name":"Ô-li-vơ","recommendation":"replace","rationale":"Gợi ý minh họa"}]',
+                                        candidates)
+        self.assertEqual(result[0]["review_status"], "pending")
+        self.assertEqual(result[0]["proposed_vietnamese_name"], "Ô-li-vơ")
+        with self.assertRaisesRegex(ValueError, "unknown name"):
+            parse_name_suggestions('[{"english_name":"Unknown","recommendation":"keep_original"}]', candidates)
 
 
 if __name__ == "__main__":
